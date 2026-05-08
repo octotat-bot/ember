@@ -1,15 +1,15 @@
 /* ==================== CSS VARIABLES ==================== */
 :root {
-  /* New UI Palette */
-  --bg-canvas:     #0F0E0D;
-  --bg-surface:    #1C1A18;
-  --bg-raised:     #242220;
-  --border:        #2E2B28;
-  --text-muted:    #6B6460;
-  --text-body:     #E8E0D8;
-  --text-bright:   #F5EFE6;
-  --accent:        #C8975A;
-  --accent-bg:     #412402;
+  /* Light Ember Palette — warm cream + amber accent */
+  --bg-canvas:     #F8F4EF;     /* warm off-white canvas */
+  --bg-surface:    #FFFFFF;     /* white cards */
+  --bg-raised:     #EEE8DF;     /* slightly raised / hover */
+  --border:        #DDD0C0;     /* warm light border */
+  --text-muted:    #9C8B7A;     /* muted warm brown */
+  --text-body:     #1C1A18;     /* dark body text */
+  --text-bright:   #0A0908;     /* near black headings */
+  --accent:        #C8975A;     /* ember amber — unchanged */
+  --accent-bg:     #FDF0E4;     /* warm amber tint background */
 
   /* Mappings */
   --bg-primary: var(--bg-canvas);
@@ -18,7 +18,7 @@
 
   --text-primary: var(--text-body);
   --text-secondary: var(--text-muted);
-  --text-inverse: var(--bg-canvas);
+  --text-inverse: #FFFFFF;     /* white on amber buttons */
 
   --border-soft: var(--border);
   --border-subtle: var(--border);
@@ -523,8 +523,8 @@ img {
 }
 
 .status-partially_served {
-  background: #1a2a2e;
-  color: #5a9eae;
+  background: #E0F0F4;
+  color: #2E7D9A;
 }
 
 .status-completed {
@@ -596,7 +596,7 @@ img {
 }
 
 .table tr:hover td {
-  background: rgba(29, 45, 68, 0.05);
+  background: rgba(200, 151, 90, 0.06);
 }
 
 /* ==================== MODALS ==================== */
@@ -850,9 +850,9 @@ img {
 /* Skeleton Loading */
 .skeleton {
   background: linear-gradient(90deg,
-      rgba(255, 255, 255, 0.1) 25%,
-      rgba(255, 255, 255, 0.2) 50%,
-      rgba(255, 255, 255, 0.1) 75%);
+      rgba(200, 151, 90, 0.08) 25%,
+      rgba(200, 151, 90, 0.15) 50%,
+      rgba(200, 151, 90, 0.08) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: var(--radius-md);
@@ -927,8 +927,8 @@ img {
 
 .sidebar {
   width: 280px;
-  background: #0F0E0D;
-  border-right: 0.5px solid #2E2B28;
+  background: #141210;   /* keep sidebar dark — premium contrast */
+  border-right: 0.5px solid #2A2724;
   position: fixed;
   top: 0;
   left: 0;
@@ -945,7 +945,7 @@ img {
   justify-content: space-between;
   gap: var(--spacing-sm);
   background: transparent;
-  border-bottom: 1px solid #2E2B28;
+  border-bottom: 1px solid #2A2724;
 }
 
 .sidebar.collapsed .sidebar-header {
@@ -1020,39 +1020,41 @@ img {
   align-items: center;
   justify-content: space-between;
   padding: var(--spacing-lg) var(--spacing-xl);
-  border-bottom: 0.5px solid #2E2B28;
-  background: #0F0E0D;
+  border-bottom: 0.5px solid var(--border);
+  background: var(--bg-surface);
   position: sticky;
   top: 0;
   z-index: 50;
+  box-shadow: 0 1px 0 var(--border);
 }
 
 .page-title {
   font-family: var(--font-secondary);
   font-size: 1.5rem;
   font-weight: 600;
-  color: #F5EFE6;
+  color: var(--text-bright);
 }
 
 /* Search Bar (Top-Right Content Flow) */
 .top-right-search {
     width: 100%;
-    background: #1C1A18;
-    border: 0.5px solid #2E2B28;
+    background: var(--bg-raised);
+    border: 0.5px solid var(--border);
     border-radius: 4px;
     padding: 8px 12px 8px 32px;
     font-family: var(--font-primary);
     font-size: 12px;
-    color: #E8E0D8;
+    color: var(--text-body);
     outline: none;
     transition: border-color 0.2s;
     box-shadow: none !important;
 }
 .top-right-search::placeholder {
-    color: #6B6460;
+    color: var(--text-muted);
 }
 .top-right-search:focus {
-    border-color: #C8975A;
+    border-color: var(--accent);
+    background: var(--bg-surface);
 }
 
 .page-content {
@@ -1441,7 +1443,7 @@ img {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(29, 45, 68, 0.1);
+  background: rgba(200, 151, 90, 0.12);
   border-radius: 50%;
   color: var(--color-primary);
 }
@@ -1490,17 +1492,17 @@ img {
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-md);
-  color: var(--text-muted);
+  color: #6B6460;
   transition: all var(--transition-fast);
   flex-shrink: 0;
-  border: 1px solid var(--border-soft);
-  background: var(--bg-tertiary);
+  border: 1px solid #2A2724;
+  background: #1C1A18;
 }
 
 .sidebar-collapse-btn:hover {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  border-color: var(--text-primary);
+  background: #242220;
+  color: #E8E0D8;
+  border-color: #C8975A;
 }
 
 .sidebar-close-mobile {
@@ -1510,13 +1512,13 @@ img {
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-md);
-  color: var(--color-text-muted);
+  color: #6B6460;
   transition: all var(--transition-fast);
 }
 
 .sidebar-close-mobile:hover {
-  background: var(--color-bg-hover);
-  color: var(--color-text-primary);
+  background: #242220;
+  color: #E8E0D8;
 }
 
 /* Mobile menu button - hidden on desktop */
@@ -1696,7 +1698,7 @@ img {
     height: auto !important;
     max-height: none !important;
     z-index: 100;
-    border-top: 1px solid var(--border-soft);
+    border-top: 1px solid #2A2724;
     border-right: none;
     overflow: visible;
   }
