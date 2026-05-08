@@ -310,7 +310,10 @@ const ItemReadyCard = ({ alert, onDismiss }) => {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--spacing-sm)' }}>
                         <div>
                             <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0A0A0A' }}>
-                                {alert.quantity && alert.quantity > 1 ? `${alert.quantity}× ` : ''}{alert.itemName || 'Item'}
+                                {alert.batchItems && alert.batchItems.length > 1
+                                    ? `${alert.batchItems.length} Dishes Ready`
+                                    : `${alert.quantity && alert.quantity > 1 ? `${alert.quantity}× ` : ''}${alert.itemName || 'Item'}`
+                                }
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#7A8DA0', fontSize: '0.8rem', marginTop: '0.2rem' }}>
                                 <MapPin size={11} /> Table {alert.tableNumber || '?'}
@@ -321,6 +324,18 @@ const ItemReadyCard = ({ alert, onDismiss }) => {
                             <ChefHat size={13} /> {alert.chefName || 'Kitchen'}
                         </div>
                     </div>
+
+                    {/* Batch item list */}
+                    {alert.batchItems && alert.batchItems.length > 1 && (
+                        <div style={{ background: '#FFF9F0', borderRadius: 'var(--radius-md)', padding: '0.5rem 0.75rem', marginBottom: 'var(--spacing-sm)', border: '1px solid rgba(200, 150, 62, 0.15)' }}>
+                            {alert.batchItems.map((it, i) => (
+                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#0A0A0A', padding: '0.2rem 0', borderBottom: i < alert.batchItems.length - 1 ? '1px solid rgba(29,45,68,0.05)' : 'none' }}>
+                                    <span>{it.name}</span>
+                                    <span style={{ color: '#7A8DA0', fontWeight: 600 }}>×{it.quantity}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
 
                     <button
                         onClick={() => { onDismiss(alert.id); navigate('/orders'); }}

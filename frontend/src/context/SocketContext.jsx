@@ -12,6 +12,10 @@ export const SocketProvider = ({ children }) => {
     const [notifications, setNotifications] = useState([]);
     const [orderReadyAlerts, setOrderReadyAlerts] = useState([]);
     const loadedRef = useRef(false);
+    // Debounce buffer for item:ready events
+    const itemReadyBuffer = useRef([]);
+    const itemReadyTimer = useRef(null);
+
 
     // Fetch persisted notifications from the database on login
     const loadNotifications = useCallback(async () => {
@@ -144,18 +148,48 @@ export const SocketProvider = ({ children }) => {
             };
             socket.on('order:ready:personal', handleOrderReadyPersonal);
 
-            // *** Item-level ready POPUP for waiter / runner ***
-            const handleItemReady = (data) => {
-                if (['waiter', 'runner'].includes(user.role)) {
+            // *** Item-level ready POPUP — debounced & batched ***
+            // Events arriving within 1.5 s are grouped into a single popup per order
+            const flushItemReadyBuffer = () => {
+                const buffer = itemReadyBuffer.current;
+                if (!buffer.length) return;
+
+                // Group events by orderId
+                const byOrder = {};
+                buffer.forEach((ev) => {
+                    if (!byOrder[ev.orderId]) {
+                        byOrder[ev.orderId] = { ...ev, batchItems: [] };
+                    }
+                    byOrder[ev.orderId].batchItems.push({ name: ev.itemName, quantity: ev.quantity });
+                });
+
+                Object.values(byOrder).forEach((group) => {
+                    const isSingle = group.batchItems.length === 1;
                     setOrderReadyAlerts((prev) => [
                         ...prev,
                         {
-                            ...data,
-                            id: `item-${data.orderId}-${data.itemId || ''}-${Date.now()}`,
+                            ...group,
+                            id: `item-batch-${group.orderId}-${Date.now()}`,
                             type: 'item_ready',
+                            itemName: isSingle
+                                ? group.batchItems[0].name
+                                : `${group.batchItems.length} dishes`,
+                            quantity: isSingle ? group.batchItems[0].quantity : group.batchItems.length,
                         },
                     ]);
-                    playNotificationSound('order_ready_personal');
+                });
+
+                itemReadyBuffer.current = [];
+                playNotificationSound('order_ready_personal');
+            };
+
+            const handleItemReady = (data) => {
+                if (['waiter', 'runner'].includes(user.role)) {
+                    // Add to buffer
+                    itemReadyBuffer.current.push(data);
+                    // Reset debounce timer
+                    if (itemReadyTimer.current) clearTimeout(itemReadyTimer.current);
+                    itemReadyTimer.current = setTimeout(flushItemReadyBuffer, 1500);
                 }
             };
             socket.on('item:ready', handleItemReady);

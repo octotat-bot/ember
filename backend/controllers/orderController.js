@@ -467,8 +467,12 @@ export const updateItemStatus = asyncHandler(async (req, res) => {
 
     // Emit new granular events
     if (status === 'ready') {
-        // Chef marked item ready → notify waiter and runner
-        emitItemReady(order, item);
+        // Only send DISH READY popup if the order is NOT fully ready yet.
+        // When it IS the last item, order status becomes 'ready' and
+        // emitOrderStatusUpdate fires order:ready:personal — no need for item popup too.
+        if (order.status !== 'ready') {
+            emitItemReady(order, item);
+        }
     }
     if (status === 'served') {
         // Item served → notify kitchen
