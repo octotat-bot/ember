@@ -275,7 +275,7 @@ export const emitItemStatusUpdate = (order, item) => {
     });
 };
 
-// Item marked ready by chef → notify waiter and runner
+// Item marked ready by chef → notify the order's specific waiter and all runners
 export const emitItemReady = (order, item) => {
     if (!ioInstance) return;
 
@@ -288,15 +288,14 @@ export const emitItemReady = (order, item) => {
         itemId: item._id,
         itemName: item.name,
         quantity: item.quantity,
+        chefName: order.chef?.name || 'Chef',
         timestamp: new Date()
     };
 
-    ioInstance.to('waiter').emit('item:ready', payload);
+    // Only notify runners via role broadcast
     ioInstance.to('runner').emit('item:ready', payload);
-    ioInstance.to('waiter').emit('notification:sound', { type: 'item_ready' });
-    ioInstance.to('runner').emit('notification:sound', { type: 'item_ready' });
 
-    // Also notify the specific waiter who owns the order
+    // Notify the specific waiter who owns this order (not all waiters — avoids duplicates)
     const waiterId = order.waiter?._id || order.waiter;
     if (waiterId) {
         ioInstance.to(`user:${waiterId}`).emit('item:ready', payload);
