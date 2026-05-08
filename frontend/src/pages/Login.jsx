@@ -98,16 +98,16 @@ const Login = () => {
                         Ember
                     </div>
 
-                    <div style={{ fontFamily: 'var(--font-primary)', fontSize: 9, color: '#6B6460', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: 8 }}>
+                    <div style={{ fontFamily: 'var(--font-primary)', fontSize: 13, color: '#6B6460', textTransform: 'uppercase', letterSpacing: '0.18em', marginBottom: 12 }}>
                         WELCOME BACK
                     </div>
-                    <div style={{ fontFamily: 'var(--font-secondary)', fontSize: 24, color: '#F5EFE6', fontWeight: 400, marginBottom: 48 }}>
+                    <div style={{ fontFamily: 'var(--font-secondary)', fontSize: 36, color: '#F5EFE6', fontWeight: 400, marginBottom: 48 }}>
                         Sign in to continue
                     </div>
 
                     <form onSubmit={handleSubmit}>
-                        <div style={{ marginBottom: 16 }}>
-                            <label style={{ display: 'block', fontFamily: 'var(--font-primary)', fontSize: 9, color: '#6B6460', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>
+                        <div style={{ marginBottom: 20 }}>
+                            <label style={{ display: 'block', fontFamily: 'var(--font-primary)', fontSize: 13, color: '#6B6460', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: 8 }}>
                                 EMAIL
                             </label>
                             <input 
@@ -119,14 +119,14 @@ const Login = () => {
                                 placeholder="name@example.com" 
                                 required 
                                 aria-label="Email address"
-                                style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '0.5px solid #2E2B28', borderRadius: 0, padding: '10px 0', fontFamily: 'var(--font-primary)', fontSize: 13, color: '#E8E0D8', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box' }} 
+                                style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '0.5px solid #2E2B28', borderRadius: 0, padding: '12px 0', fontFamily: 'var(--font-primary)', fontSize: 16, color: '#E8E0D8', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box' }} 
                                 onFocus={e => { e.target.style.borderBottom = '1px solid #C8975A'; }} 
                                 onBlur={e => { e.target.style.borderBottom = '0.5px solid #2E2B28'; }} 
                             />
                         </div>
 
-                        <div style={{ marginBottom: 32 }}>
-                            <label style={{ display: 'block', fontFamily: 'var(--font-primary)', fontSize: 9, color: '#6B6460', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>
+                        <div style={{ marginBottom: 36 }}>
+                            <label style={{ display: 'block', fontFamily: 'var(--font-primary)', fontSize: 13, color: '#6B6460', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: 8 }}>
                                 PASSWORD
                             </label>
                             <input 
@@ -138,7 +138,7 @@ const Login = () => {
                                 placeholder="Enter password" 
                                 required 
                                 aria-label="Password"
-                                style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '0.5px solid #2E2B28', borderRadius: 0, padding: '10px 0', fontFamily: 'var(--font-primary)', fontSize: 13, color: '#E8E0D8', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box' }} 
+                                style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '0.5px solid #2E2B28', borderRadius: 0, padding: '12px 0', fontFamily: 'var(--font-primary)', fontSize: 16, color: '#E8E0D8', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box' }} 
                                 onFocus={e => { e.target.style.borderBottom = '1px solid #C8975A'; }} 
                                 onBlur={e => { e.target.style.borderBottom = '0.5px solid #2E2B28'; }} 
                             />
@@ -148,7 +148,7 @@ const Login = () => {
                             type="submit" 
                             disabled={loading} 
                             aria-label="Sign in"
-                            style={{ width: '100%', background: 'transparent', border: '0.5px solid #C8975A', color: '#C8975A', fontFamily: 'var(--font-primary)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.14em', borderRadius: 0, padding: '14px 0', cursor: loading ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 200ms ease', opacity: loading ? 0.6 : 1 }}
+                            style={{ width: '100%', background: 'transparent', border: '0.5px solid #C8975A', color: '#C8975A', fontFamily: 'var(--font-primary)', fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.18em', borderRadius: 0, padding: '16px 0', cursor: loading ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 200ms ease', opacity: loading ? 0.6 : 1 }}
                             onMouseOver={e => { if (!loading) { e.currentTarget.style.background = '#C8975A'; e.currentTarget.style.color = '#0F0E0D'; } }}
                             onMouseOut={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#C8975A'; }}
                         >
@@ -157,12 +157,12 @@ const Login = () => {
 
                         {isDev && (
                             <div style={{ marginTop: 24 }}>
-                                <div style={{ fontFamily: 'var(--font-primary)', fontSize: 8, color: '#2E2B28', marginBottom: 4 }}>
+                                <div style={{ fontFamily: 'var(--font-primary)', fontSize: 11, color: '#2E2B28', marginBottom: 6 }}>
                                     DEMO ROLES (DEV ONLY)
                                 </div>
-                                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                                     {['admin','waiter','chef','cashier','runner'].map((r, i, arr) => (
-                                        <span key={r} style={{ fontFamily: 'var(--font-primary)', fontSize: 10, color: '#2E2B28', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                        <span key={r} style={{ fontFamily: 'var(--font-primary)', fontSize: 13, color: '#2E2B28', display: 'flex', alignItems: 'center', gap: 8 }}>
                                             <span onClick={() => { setFormData({email: `${r}@cafe.com`, password: `${r}123`}); }} style={{ cursor: 'pointer', transition: 'color 0.2s' }} onMouseOver={e => e.currentTarget.style.color = '#6B6460'} onMouseOut={e => e.currentTarget.style.color = '#2E2B28'}>{r}</span>
                                             {i < arr.length - 1 && <span>·</span>}
                                         </span>
