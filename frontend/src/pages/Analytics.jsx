@@ -415,9 +415,9 @@ const Analytics = () => {
                             ) : (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                                     {(() => {
-                                        const maxOrders = Math.max(...popularItems.map((item) => item.orderCount || item.totalOrdered || 1), 1);
+                                        const maxOrders = Math.max(...popularItems.map((item) => item.orderCount || item.totalOrdered || item.popularity || 1), 1);
                                         return popularItems.slice(0, 10).map((item, idx) => {
-                                            const count = item.orderCount || item.totalOrdered || 0;
+                                            const count = item.orderCount || item.totalOrdered || item.popularity || 0;
                                             const widthPct = (count / maxOrders) * 100;
                                             return (
                                                 <motion.div
