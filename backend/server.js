@@ -32,7 +32,7 @@ const httpServer = createServer(app);
 
 // CORS origin check — in production, require explicit CLIENT_URL; in dev allow any localhost
 const corsOrigin = (() => {
-    if (process.env.CLIENT_URL) return process.env.CLIENT_URL;
+    if (process.env.CLIENT_URL) return process.env.CLIENT_URL.replace(/\/$/, '');
     if (process.env.NODE_ENV === 'production') {
         console.error('❌ CLIENT_URL environment variable is required in production!');
         process.exit(1);
