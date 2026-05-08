@@ -3,7 +3,7 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
-const isDev = import.meta.env.DEV;
+const isDev = true; // Show demo role buttons in all environments
 
 const Login = () => {
     const { login, isAuthenticated, loading: authLoading, user } = useAuth();
