@@ -18,7 +18,8 @@ import {
 
 // ── Status flow label helper ──────────────────────────
 const STATUS_FLOW = {
-    pending: { next: 'confirmed', label: 'Confirm Order', color: 'primary', roles: ['admin', 'waiter'] },
+    // pending → preparing in one click (skips 'confirmed' — kitchen is notified immediately)
+    pending: { next: 'preparing', label: 'Confirm & Send to Kitchen', color: 'primary', roles: ['admin', 'waiter'] },
     confirmed: { next: 'preparing', label: 'Send to Kitchen', color: 'primary', roles: ['admin', 'waiter', 'chef'] },
     preparing: { next: 'ready', label: 'Mark Ready', color: 'success', roles: ['admin', 'chef'] },
     ready: { next: 'served', label: 'Mark Served', color: 'success', roles: ['admin', 'waiter', 'runner'] },

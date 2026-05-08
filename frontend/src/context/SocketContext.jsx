@@ -144,18 +144,18 @@ export const SocketProvider = ({ children }) => {
             };
             socket.on('order:ready:personal', handleOrderReadyPersonal);
 
-            // *** Item-level ready toast for waiter / runner ***
+            // *** Item-level ready POPUP for waiter / runner ***
             const handleItemReady = (data) => {
-                // Only show toast for waiter and runner roles
                 if (['waiter', 'runner'].includes(user.role)) {
-                    const itemName = data.itemName || 'Item';
-                    const qty = data.quantity || 1;
-                    const tableNum = data.tableNumber || '?';
-                    toast.success(`${itemName} × ${qty} ready for Table ${tableNum}`, {
-                        icon: '🍽️',
-                        duration: 5000,
-                    });
-                    playNotificationSound('item_ready');
+                    setOrderReadyAlerts((prev) => [
+                        ...prev,
+                        {
+                            ...data,
+                            id: `item-${data.orderId}-${data.itemId || ''}-${Date.now()}`,
+                            type: 'item_ready',
+                        },
+                    ]);
+                    playNotificationSound('order_ready_personal');
                 }
             };
             socket.on('item:ready', handleItemReady);
