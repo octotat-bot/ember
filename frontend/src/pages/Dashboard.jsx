@@ -77,9 +77,10 @@ const useElapsed = (createdAt) => {
 
 const WaitChip = ({ minutes }) => {
     const col = minutes > 20 ? '#dc2626' : minutes > 12 ? '#d97706' : minutes > 6 ? '#C8975A' : '#5a9e5a';
+    const label = minutes >= 60 ? `${Math.floor(minutes / 60)}h ${minutes % 60}m` : `${minutes}m`;
     return (
-        <span style={{ fontSize: '10px', fontWeight: 700, color: col, background: `${col}18`, borderRadius: '3px', padding: '2px 6px', fontFamily: 'var(--font-primary)' }}>
-            {minutes}m
+        <span style={{ fontSize: '10px', fontWeight: 700, color: col, background: `${col}18`, borderRadius: '3px', padding: '2px 6px', fontFamily: 'var(--font-primary)', whiteSpace: 'nowrap' }}>
+            {label}
         </span>
     );
 };
@@ -766,7 +767,7 @@ const Dashboard = () => {
             {/* Greeting Header */}
             <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                    <div style={{ fontFamily: 'var(--font-primary)', fontSize: '11px', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{greeting}, {user?.name?.split(' ')[0] || user?.username || 'there'} 👋</div>
+                    <div style={{ fontFamily: 'var(--font-primary)', fontSize: '11px', color: 'var(--color-text-muted)', letterSpacing: '0.04em' }}>{greeting}, <strong style={{ color: 'var(--color-text)' }}>{user?.name?.split(' ')[0] || user?.username || 'there'}</strong> 👋</div>
                     <div style={{ fontFamily: 'var(--font-primary)', fontSize: '10px', color: 'var(--color-text-muted)', marginTop: '2px' }}>{config.subtitle}</div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
