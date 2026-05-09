@@ -113,6 +113,8 @@ export const orderAPI = {
     addItems: (id, items) => api.post(`/orders/${id}/items`, { items }),
     removeItem: (orderId, itemId) => api.delete(`/orders/${orderId}/items/${itemId}`),
     processPayment: (id, paymentData) => api.post(`/orders/${id}/payment`, paymentData),
+    setPriority: (id, priority) => api.patch(`/orders/${id}/priority`, { priority }),
+    transferTable: (id, tableId) => api.patch(`/orders/${id}/transfer`, { tableId }),
 };
 
 // ==================== NOTIFICATION API ====================
@@ -137,6 +139,14 @@ export const reservationAPI = {
 export const settingsAPI = {
     get: () => api.get('/settings'),
     update: (data) => api.put('/settings', data),
+};
+
+// ==================== SHIFT NOTES API ====================
+export const shiftNotesAPI = {
+    getAll: () => api.get('/shift-notes'),
+    create: (content) => api.post('/shift-notes', { content }),
+    togglePin: (id) => api.patch(`/shift-notes/${id}/pin`),
+    delete: (id) => api.delete(`/shift-notes/${id}`),
 };
 
 export default api;

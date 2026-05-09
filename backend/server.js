@@ -20,6 +20,7 @@ import orderRoutes from './routes/orderRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import settingsRoutes from './routes/settingsRoutes.js';
 import reservationRoutes from './routes/reservationRoutes.js';
+import shiftNoteRoutes from './routes/shiftNoteRoutes.js';
 
 // Load environment variables
 dotenv.config();
@@ -147,6 +148,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/reservations', reservationRoutes);
+app.use('/api/shift-notes', shiftNoteRoutes);
 
 // API info route
 app.get('/api', (req, res) => {

@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { sounds, unlockAudio } from '../utils/sounds';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
@@ -132,7 +133,7 @@ const ROLE_GREETING = (role) => {
 
 const Layout = ({ children }) => {
     const { user, logout } = useAuth();
-    const { unreadCount, notifications, markNotificationRead, markAllRead } = useSocket();
+    const { socket, unreadCount, notifications, markNotificationRead, markAllRead } = useSocket();
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -142,6 +143,29 @@ const Layout = ({ children }) => {
     useEffect(() => {
         document.title = pageName === 'DASHBOARD' ? 'Ember' : `Ember — ${pageName.charAt(0) + pageName.slice(1).toLowerCase()}`;
     }, [pageName]);
+
+    // Unlock audio on first interaction (browser autoplay policy)
+    useEffect(() => {
+        const unlock = () => { unlockAudio(); document.removeEventListener('click', unlock); };
+        document.addEventListener('click', unlock);
+        return () => document.removeEventListener('click', unlock);
+    }, []);
+
+    // Socket-driven sound alerts
+    useEffect(() => {
+        if (!socket?.on) return;
+        const onNewOrder = () => sounds.newOrder();
+        const onOrderReady = () => sounds.orderReady();
+        const onPayment = () => sounds.payment();
+        socket.on('order:new', onNewOrder);
+        socket.on('order:ready', onOrderReady);
+        socket.on('payment:completed', onPayment);
+        return () => {
+            socket.off('order:new', onNewOrder);
+            socket.off('order:ready', onOrderReady);
+            socket.off('payment:completed', onPayment);
+        };
+    }, [socket]);
 
     const [previewRole, setPreviewRole] = useState(null);
     const [showDropdown, setShowDropdown] = useState(false);

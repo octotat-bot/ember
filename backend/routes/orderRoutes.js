@@ -13,7 +13,9 @@ import {
     getUnpaidOrders,
     getOrderStats,
     getMyOrders,
-    getInvoice
+    getInvoice,
+    setPriority,
+    transferTable,
 } from '../controllers/orderController.js';
 import { authenticate, authorize } from '../middleware/auth.js';
 import { orderValidation, validate, validateObjectId } from '../middleware/validation.js';
@@ -52,5 +54,11 @@ router.delete('/:id/items/:itemId', authorize('admin', 'waiter'), removeItemFrom
 
 // Payment - cashier and admin
 router.post('/:id/payment', authorize('admin', 'cashier'), validateObjectId('id'), validate, orderValidation.payment, validate, processPayment);
+
+// Kitchen priority flag — chef and admin
+router.patch('/:id/priority', authorize('admin', 'chef'), validateObjectId('id'), validate, setPriority);
+
+// One-tap table transfer — waiter and admin
+router.patch('/:id/transfer', authorize('admin', 'waiter'), validateObjectId('id'), validate, transferTable);
 
 export default router;

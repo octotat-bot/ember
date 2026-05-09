@@ -15,6 +15,7 @@ import {
     Loader2,
     Play,
     ArrowRight,
+    Zap,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -53,7 +54,7 @@ const ITEM_BUTTON_CONFIG = {
 // ═══════════════════════════════════════════════════════
 //  KITCHEN ORDER CARD
 // ═══════════════════════════════════════════════════════
-const KitchenOrderCard = ({ order, onStatusChange, onItemStatusChange, updatingItem }) => {
+const KitchenOrderCard = ({ order, onStatusChange, onItemStatusChange, updatingItem, onPriorityChange }) => {
     const [updating, setUpdating] = useState(false);
     const [now, setNow] = useState(new Date());
 
@@ -166,6 +167,22 @@ const KitchenOrderCard = ({ order, onStatusChange, onItemStatusChange, updatingI
                     <Timer size={16} />
                     {waitTime}m
                 </div>
+                {/* Rush flag button */}
+                <button
+                    onClick={() => onPriorityChange(order._id, order.priority === 'urgent' ? 'normal' : 'urgent')}
+                    title={order.priority === 'urgent' ? 'Remove rush flag' : 'Mark as RUSH'}
+                    style={{
+                        border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer',
+                        padding: '0.35rem 0.7rem', fontWeight: 700, fontSize: '0.75rem',
+                        display: 'flex', alignItems: 'center', gap: 4,
+                        background: order.priority === 'urgent' ? 'rgba(220,38,38,0.15)' : 'var(--color-bg-tertiary)',
+                        color: order.priority === 'urgent' ? '#dc2626' : 'var(--color-text-muted)',
+                        transition: 'all 0.2s',
+                    }}
+                >
+                    <Zap size={13} />
+                    {order.priority === 'urgent' ? 'RUSH' : 'Rush'}
+                </button>
             </div>
 
             {/* ── Progress bar (only when preparing) ──── */}
@@ -358,6 +375,16 @@ const Kitchen = () => {
         }
     };
 
+    const handlePriorityChange = async (orderId, priority) => {
+        try {
+            await orderAPI.setPriority(orderId, priority);
+            refetch();
+            toast.success(priority === 'urgent' ? '🔴 Order marked as RUSH!' : 'Rush flag removed');
+        } catch {
+            toast.error('Failed to update priority');
+        }
+    };
+
     useEffect(() => { if (error) toast.error(error); }, [error]);
 
     useEffect(() => {
@@ -383,11 +410,18 @@ const Kitchen = () => {
         };
     }, [socket, refetch]);
 
-    const filteredOrders = orders.filter((order) => {
-        if (filter === 'all') return true;
-        if (filter === 'new') return ['pending', 'confirmed'].includes(order.status);
-        return order.status === filter;
-    });
+    const filteredOrders = orders
+        .filter((order) => {
+            if (filter === 'all') return true;
+            if (filter === 'new') return ['pending', 'confirmed'].includes(order.status);
+            return order.status === filter;
+        })
+        .sort((a, b) => {
+            // Rush orders always first
+            if (a.priority === 'urgent' && b.priority !== 'urgent') return -1;
+            if (b.priority === 'urgent' && a.priority !== 'urgent') return 1;
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        });
 
     const newCount = orders.filter((o) => ['pending', 'confirmed'].includes(o.status)).length;
     const preparingCount = orders.filter((o) => o.status === 'preparing').length;
@@ -448,6 +482,7 @@ const Kitchen = () => {
                                 onStatusChange={updateStatus}
                                 onItemStatusChange={handleItemStatus}
                                 updatingItem={updatingItem}
+                                onPriorityChange={handlePriorityChange}
                             />
                         ))}
                     </AnimatePresence>

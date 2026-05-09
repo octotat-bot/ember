@@ -1,9 +1,10 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import toast from 'react-hot-toast';
+import { sounds } from '../utils/sounds';
 import Layout from '../components/Layout';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
-import { orderAPI, tableAPI } from '../services/api';
+import { orderAPI, tableAPI, shiftNotesAPI } from '../services/api';
 import { PageLoader } from '../components/Loader';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -277,6 +278,28 @@ const FullTicketRow = ({ order }) => {
 }
 
 const AdminDashboard = ({ recentOrders, tableSummary, stats, onlineUsers, loading, navigate }) => {
+    // ── Smart Order Timer Alerts ──────────────────────────
+    const alertedIds = useRef(new Set());
+    useEffect(() => {
+        const check = () => {
+            const now = Date.now();
+            const THRESHOLD = 20 * 60 * 1000; // 20 minutes
+            recentOrders.forEach(order => {
+                if (['completed', 'cancelled', 'served'].includes(order.status)) return;
+                if (alertedIds.current.has(order._id)) return;
+                const elapsed = now - new Date(order.createdAt).getTime();
+                if (elapsed >= THRESHOLD) {
+                    alertedIds.current.add(order._id);
+                    sounds.urgentAlert();
+                    toast.error(`⚠️ Order ${order.orderNumber} — Table ${order.tableNumber} waiting 20+ minutes!`, { duration: 6000 });
+                }
+            });
+        };
+        check(); // run immediately
+        const t = setInterval(check, 60000);
+        return () => clearInterval(t);
+    }, [recentOrders]);
+
     const tableKeys = ['occupied', 'reserved', 'cleaning', 'available'];
     const tablesList = [];
     let tableIndex = 1;
@@ -700,6 +723,157 @@ const RunnerDashboard = ({ recentOrders, loading, navigate }) => {
 // ═══════════════════════════════════════════════════════════
 //  MAIN DASHBOARD
 // ═══════════════════════════════════════════════════════════
+// ── Shift Handover Notes ─────────────────────────────────
+
+const SHIFT_COLORS = { morning: '#f59e0b', afternoon: '#3b82f6', evening: '#8b5cf6' };
+
+const ShiftHandoverNotes = ({ userRole }) => {
+    const { user } = useAuth();
+    const { socket } = useSocket();
+    const [notes, setNotes] = useState([]);
+    const [draft, setDraft] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+    const [open, setOpen] = useState(false);
+
+    const fetchNotes = useCallback(async () => {
+        try {
+            const res = await shiftNotesAPI.getAll();
+            setNotes(res.data?.data || []);
+        } catch {}
+    }, []);
+
+    useEffect(() => { fetchNotes(); }, [fetchNotes]);
+
+    // Real-time new note via socket
+    useEffect(() => {
+        if (!socket?.on) return;
+        const handler = (note) => setNotes(prev => [note, ...prev].slice(0, 50));
+        socket.on('shift:note', handler);
+        return () => socket.off('shift:note', handler);
+    }, [socket]);
+
+    const handleSubmit = async () => {
+        if (!draft.trim()) return;
+        setSubmitting(true);
+        try {
+            await shiftNotesAPI.create(draft.trim());
+            setDraft('');
+            fetchNotes();
+        } catch { toast.error('Failed to post note'); }
+        finally { setSubmitting(false); }
+    };
+
+    const handlePin = async (id) => {
+        try { await shiftNotesAPI.togglePin(id); fetchNotes(); } catch {}
+    };
+
+    const handleDelete = async (id) => {
+        try { await shiftNotesAPI.delete(id); setNotes(prev => prev.filter(n => n._id !== id)); } catch {}
+    };
+
+    const timeAgo = (ts) => {
+        const m = Math.floor((Date.now() - new Date(ts)) / 60000);
+        if (m < 1) return 'just now';
+        if (m < 60) return `${m}m ago`;
+        const h = Math.floor(m / 60);
+        return h < 24 ? `${h}h ago` : `${Math.floor(h / 24)}d ago`;
+    };
+
+    const unread = notes.length;
+
+    return (
+        <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+            {/* Toggle header */}
+            <div
+                onClick={() => setOpen(o => !o)}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginBottom: open ? 'var(--spacing-md)' : 0 }}
+            >
+                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-text)' }}>📋 Shift Handover Notes</span>
+                {unread > 0 && (
+                    <span style={{ background: '#C8975A', color: '#fff', borderRadius: '99px', padding: '1px 7px', fontSize: '10px', fontWeight: 700 }}>{unread}</span>
+                )}
+                <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginLeft: 'auto' }}>{open ? '▲' : '▼'}</span>
+            </div>
+
+            <AnimatePresence>
+                {open && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        style={{ overflow: 'hidden' }}
+                    >
+                        <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', padding: 'var(--spacing-md)' }}>
+                            {/* Compose */}
+                            <div style={{ display: 'flex', gap: 'var(--spacing-sm)', marginBottom: 'var(--spacing-md)' }}>
+                                <textarea
+                                    value={draft}
+                                    onChange={e => setDraft(e.target.value)}
+                                    onKeyDown={e => { if (e.key === 'Enter' && e.ctrlKey) handleSubmit(); }}
+                                    placeholder="Leave a note for the next shift… (Ctrl+Enter to post)"
+                                    rows={2}
+                                    style={{
+                                        flex: 1, resize: 'vertical', borderRadius: 'var(--radius-md)',
+                                        border: '1px solid var(--color-border)', padding: '0.6rem 0.75rem',
+                                        fontFamily: 'var(--font-primary)', fontSize: '0.85rem',
+                                        background: 'var(--color-bg-tertiary)', color: 'var(--color-text)',
+                                    }}
+                                />
+                                <button
+                                    className="btn btn-primary btn-sm"
+                                    onClick={handleSubmit}
+                                    disabled={submitting || !draft.trim()}
+                                    style={{ alignSelf: 'flex-end' }}
+                                >
+                                    {submitting ? '…' : 'Post'}
+                                </button>
+                            </div>
+
+                            {/* Notes list */}
+                            {notes.length === 0 ? (
+                                <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', textAlign: 'center', padding: 'var(--spacing-md)' }}>
+                                    No notes for the last 24 hours.
+                                </p>
+                            ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 280, overflowY: 'auto' }}>
+                                    {notes.map(note => (
+                                        <div key={note._id} style={{
+                                            padding: '0.6rem 0.8rem',
+                                            background: note.pinned ? 'rgba(200,151,90,0.06)' : 'var(--color-bg-tertiary)',
+                                            borderRadius: 'var(--radius-md)',
+                                            borderLeft: `3px solid ${note.pinned ? '#C8975A' : (SHIFT_COLORS[note.shift] || '#6B6460')}`,
+                                            display: 'flex', gap: 8, alignItems: 'flex-start',
+                                        }}>
+                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                <div style={{ fontSize: '0.82rem', color: 'var(--color-text)', lineHeight: 1.5 }}>{note.content}</div>
+                                                <div style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', marginTop: 3 }}>
+                                                    <span style={{ fontWeight: 600 }}>{note.authorName || note.author?.name}</span>
+                                                    <span style={{ margin: '0 4px' }}>·</span>
+                                                    <span style={{ textTransform: 'capitalize', color: SHIFT_COLORS[note.shift] || '#6B6460' }}>{note.shift}</span>
+                                                    <span style={{ margin: '0 4px' }}>·</span>
+                                                    {timeAgo(note.createdAt)}
+                                                </div>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                                                {userRole === 'admin' && (
+                                                    <button onClick={() => handlePin(note._id)} title={note.pinned ? 'Unpin' : 'Pin'} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', opacity: note.pinned ? 1 : 0.4 }}>📌</button>
+                                                )}
+                                                {(note.author?._id === user?._id || userRole === 'admin') && (
+                                                    <button onClick={() => handleDelete(note._id)} title="Delete" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', opacity: 0.5 }}>🗑</button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
+
 const Dashboard = () => {
     const { user, hasRole } = useAuth();
     const { socket } = useSocket();
@@ -774,6 +948,10 @@ const Dashboard = () => {
 
     return (
         <Layout>
+            {/* Shift Handover Notes — admin + waiter */}
+            {['admin', 'waiter'].includes(role) && (
+                <ShiftHandoverNotes userRole={role} />
+            )}
             {/* Dashboard */}
             {renderDashboard()}
 

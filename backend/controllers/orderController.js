@@ -1053,3 +1053,72 @@ export const getPublicOrderStatus = asyncHandler(async (req, res) => {
         }
     });
 });
+
+// @desc    Set kitchen priority flag on an order
+// @route   PATCH /api/orders/:id/priority
+// @access  Private (Chef, Admin)
+export const setPriority = asyncHandler(async (req, res) => {
+    const { priority } = req.body;
+    const VALID = ['low', 'normal', 'high', 'urgent'];
+    if (!VALID.includes(priority)) {
+        return res.status(400).json({ success: false, message: `priority must be one of: ${VALID.join(', ')}` });
+    }
+
+    const order = await Order.findByIdAndUpdate(
+        req.params.id,
+        { priority },
+        { new: true }
+    ).populate('table', 'tableNumber').populate('waiter', 'name');
+
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
+    // Notify kitchen of priority change
+    const io = req.app.get('io');
+    if (io) io.emit('order:updated', { order, type: 'priority_change' });
+
+    res.json({ success: true, data: order });
+});
+
+// @desc    Transfer order to a different table (one-tap table transfer)
+// @route   PATCH /api/orders/:id/transfer
+// @access  Private (Waiter, Admin)
+export const transferTable = asyncHandler(async (req, res) => {
+    const { tableId } = req.body;
+    if (!tableId) return res.status(400).json({ success: false, message: 'tableId is required' });
+
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
+    if (['completed', 'cancelled'].includes(order.status)) {
+        return res.status(400).json({ success: false, message: 'Cannot transfer a completed or cancelled order' });
+    }
+
+    const newTable = await Table.findById(tableId);
+    if (!newTable) return res.status(404).json({ success: false, message: 'Target table not found' });
+    if (newTable.currentOrder) return res.status(400).json({ success: false, message: `Table ${newTable.tableNumber} already has an active order` });
+
+    // Free the old table
+    const oldTable = await Table.findById(order.table);
+    if (oldTable && oldTable.currentOrder?.toString() === order._id.toString()) {
+        oldTable.currentOrder = null;
+        oldTable.status = 'available';
+        await oldTable.save();
+    }
+
+    // Assign to new table
+    order.table = newTable._id;
+    order.tableNumber = newTable.tableNumber;
+    order.addStatusHistory(order.status, req.user._id, `Transferred to Table ${newTable.tableNumber}`);
+    await order.save();
+
+    newTable.currentOrder = order._id;
+    newTable.status = 'occupied';
+    await newTable.save();
+
+    await order.populate([{ path: 'table', select: 'tableNumber' }, { path: 'waiter', select: 'name' }]);
+
+    const io = req.app.get('io');
+    if (io) io.emit('order:updated', { order, type: 'table_transfer' });
+
+    res.json({ success: true, message: `Order transferred to Table ${newTable.tableNumber}`, data: order });
+});
