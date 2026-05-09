@@ -14,7 +14,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { TransferTableModal, OrderJourneyModal } from '../components/OrderModals';
 import {
     Plus, Clock, X, Minus, Search, UtensilsCrossed, Leaf,
-    ChevronDown, ChevronUp, Ban, CheckCircle, Loader2,
+    ChevronDown, ChevronUp, Ban, CheckCircle, Loader2, ArrowRight,
 } from 'lucide-react';
 
 // ── Status flow label helper ──────────────────────────
