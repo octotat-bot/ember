@@ -351,10 +351,6 @@ const AppSettingsSection = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'var(--spacing-md)' }}>
                         <div className="input-group">
-                            <label className="input-label">Restaurant Name</label>
-                            <input className="input" value={form.restaurantName || ''} onChange={(e) => updateField('restaurantName', e.target.value)} />
-                        </div>
-                        <div className="input-group">
                             <label className="input-label">Tax Rate (%)</label>
                             <input type="number" className="input" min="0" max="100" step="0.5" value={form.taxRate ?? ''} onChange={(e) => updateField('taxRate', parseFloat(e.target.value) || 0)} />
                         </div>
@@ -417,7 +413,6 @@ const AppSettingsSection = () => {
                 /* ── Read Mode ─────────────────────── */
                 <>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--spacing-md)' }}>
-                        <ReadOnlyField label="Restaurant Name" value={settings?.restaurantName || 'Ember'} />
                         <ReadOnlyField label="Tax Rate" value={`${settings?.taxRate ?? 18}%`} />
                         <ReadOnlyField label="Currency" value={`${settings?.currency || 'INR'} (${settings?.currencySymbol || '₹'})`} />
                         <ReadOnlyField label="Order Timeout" value={`${settings?.orderTimeout ?? 30} minutes`} />
