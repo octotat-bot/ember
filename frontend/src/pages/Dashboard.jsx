@@ -7,6 +7,7 @@ import { useSocket } from '../context/SocketContext';
 import { orderAPI, tableAPI, shiftNotesAPI } from '../services/api';
 import { PageLoader } from '../components/Loader';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     TrendingUp,
     Users,
@@ -27,7 +28,7 @@ import {
     Eye,
     Receipt,
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+
 
 // ─── Animation variants ──────────────────────────────────
 const cell = (delay = 0) => ({
