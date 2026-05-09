@@ -32,21 +32,26 @@ const app = express();
 const httpServer = createServer(app);
 
 // CORS origin check — in production, require explicit CLIENT_URL; in dev allow any localhost
-const corsOrigin = (() => {
-    if (process.env.CLIENT_URL) return process.env.CLIENT_URL.replace(/\/$/, '');
-    if (process.env.NODE_ENV === 'production') {
-        console.error('❌ CLIENT_URL environment variable is required in production!');
-        process.exit(1);
+const corsOrigin = (origin, callback) => {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Development localhost
+    if (/^https?:\/\/localhost(:\d+)?$/.test(origin)) {
+        return callback(null, true);
     }
-    // Development: allow any localhost port
-    return (origin, callback) => {
-        if (!origin) return callback(null, true);
-        if (/^https?:\/\/localhost(:\d+)?$/.test(origin)) {
-            return callback(null, true);
-        }
-        callback(new Error('Not allowed by CORS'));
-    };
-})();
+    
+    // Production vercel domains or explicit CLIENT_URL
+    if (process.env.CLIENT_URL && origin === process.env.CLIENT_URL.replace(/\/$/, '')) {
+        return callback(null, true);
+    }
+    
+    if (origin.endsWith('.vercel.app')) {
+        return callback(null, true);
+    }
+    
+    callback(new Error('Not allowed by CORS'));
+};
 
 // Initialize Socket.IO
 const io = new Server(httpServer, {
