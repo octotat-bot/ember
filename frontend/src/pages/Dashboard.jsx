@@ -120,6 +120,7 @@ const OrderRow = ({ order }) => {
     };
 
     const elapsed = useElapsed(order.createdAt);
+    const isDone = ['completed', 'cancelled', 'served'].includes(order.status);
     return (
         <div style={{
             padding: '0.85rem 0.75rem',
@@ -151,7 +152,9 @@ const OrderRow = ({ order }) => {
                 </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexShrink: 0 }}>
-                <WaitChip minutes={elapsed} />
+                {isDone
+                    ? <span style={{ fontSize: '10px', color: '#5a9e5a', fontWeight: 700 }}>✓</span>
+                    : <WaitChip minutes={elapsed} />}
                 <span style={{ fontWeight: 700, fontSize: '13px', color: 'var(--color-primary)', fontFamily: 'var(--font-secondary)' }}>₹{order.totalAmount?.toFixed(0)}</span>
                 <span style={getBadgeStyle(order.status)}>{order.status}</span>
             </div>
@@ -226,6 +229,7 @@ const roleConfig = {
 // ═══════════════════════════════════════════════════════════
 const FullTicketRow = ({ order }) => {
     const elapsed = useElapsed(order.createdAt);
+    const isDone = ['completed', 'cancelled', 'served'].includes(order.status);
     const bgColors = { pending: 'rgba(107,100,96,0.1)', preparing: 'rgba(90,122,200,0.12)', ready: 'rgba(200,151,90,0.15)', partially_served: 'rgba(90,158,174,0.1)', served: 'rgba(107,100,96,0.1)', completed: 'rgba(90,158,90,0.1)', cancelled: 'rgba(107,100,96,0.08)' };
     const textColors = { pending: 'var(--color-text-muted)', preparing: '#3d5aa0', ready: '#a06a20', partially_served: '#3d7a8a', served: 'var(--color-text-muted)', completed: '#3d8a3d', cancelled: 'var(--color-text-muted)' };
 
@@ -255,7 +259,9 @@ const FullTicketRow = ({ order }) => {
             {/* Right side */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px', flexShrink: 0, paddingLeft: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <WaitChip minutes={elapsed} />
+                    {isDone
+                        ? <span style={{ fontSize: '11px', color: '#5a9e5a', fontWeight: 700 }}>✓ done</span>
+                        : <WaitChip minutes={elapsed} />}
                     <span style={{ fontFamily: 'var(--font-primary)', fontSize: '14px', fontWeight: 700, color: 'var(--color-primary)' }}>₹{order.totalAmount?.toFixed(0)}</span>
                 </div>
                 <span style={{
@@ -321,9 +327,13 @@ const AdminDashboard = ({ recentOrders, tableSummary, stats, onlineUsers, loadin
         return 'var(--color-text-muted)';
     };
 
-    const minutesAgo = (ts) => {
+    const timeAgo = (ts) => {
         const m = Math.floor((Date.now() - new Date(ts)) / 60000);
-        return m < 1 ? 'just now' : `${m}m ago`;
+        if (m < 1) return 'just now';
+        if (m < 60) return `${m}m ago`;
+        const h = Math.floor(m / 60);
+        const rem = m % 60;
+        return rem > 0 ? `${h}h ${rem}m ago` : `${h}h ago`;
     };
 
     return (
@@ -382,7 +392,7 @@ const AdminDashboard = ({ recentOrders, tableSummary, stats, onlineUsers, loadin
                                 <div style={{ width: 6, height: 6, borderRadius: '50%', background: activityColor(o), flexShrink: 0 }} />
                                 <span style={{ fontFamily: 'var(--font-primary)', fontSize: '11px', color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{activityLabel(o)}</span>
                             </div>
-                            <span style={{ fontFamily: 'var(--font-primary)', fontSize: '10px', color: '#9C8B7A', flexShrink: 0 }}>{minutesAgo(o.updatedAt)}</span>
+                            <span style={{ fontFamily: 'var(--font-primary)', fontSize: '10px', color: '#9C8B7A', flexShrink: 0 }}>{timeAgo(o.updatedAt)}</span>
                         </div>
                     ))}
                     <div style={{ borderTop: '0.5px solid var(--color-border)', marginTop: '8px', paddingTop: '12px', display: 'flex', gap: '16px' }}>
@@ -765,14 +775,35 @@ const Dashboard = () => {
     return (
         <Layout>
             {/* Greeting Header */}
-            <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{
+                marginBottom: '28px',
+                paddingBottom: '20px',
+                borderBottom: '1px solid var(--color-border)',
+                display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
+            }}>
                 <div>
-                    <div style={{ fontFamily: 'var(--font-primary)', fontSize: '11px', color: 'var(--color-text-muted)', letterSpacing: '0.04em' }}>{greeting}, <strong style={{ color: 'var(--color-text)' }}>{user?.name?.split(' ')[0] || user?.username || 'there'}</strong> 👋</div>
-                    <div style={{ fontFamily: 'var(--font-primary)', fontSize: '10px', color: 'var(--color-text-muted)', marginTop: '2px' }}>{config.subtitle}</div>
+                    <div style={{ fontFamily: 'var(--font-primary)', fontSize: '11px', color: 'var(--color-text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '4px' }}>{greeting}</div>
+                    <div style={{ fontFamily: 'var(--font-secondary)', fontSize: '32px', fontWeight: 700, color: 'var(--color-text)', lineHeight: 1.1 }}>
+                        {user?.name || user?.username || 'Welcome'} 👋
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '8px' }}>
+                        <span style={{
+                            fontFamily: 'var(--font-primary)', fontSize: '10px',
+                            background: 'var(--accent-bg)', color: 'var(--color-primary)',
+                            padding: '3px 10px', borderRadius: '4px',
+                            textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600,
+                        }}>{role}</span>
+                        <span style={{ fontFamily: 'var(--font-primary)', fontSize: '11px', color: 'var(--color-text-muted)' }}>{config.subtitle}</span>
+                    </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#5a9e5a', animation: 'pulse-badge 2s infinite' }} />
-                    <span style={{ fontFamily: 'var(--font-primary)', fontSize: '10px', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Live</span>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#5a9e5a', animation: 'pulse-badge 2s infinite' }} />
+                        <span style={{ fontFamily: 'var(--font-primary)', fontSize: '11px', color: '#5a9e5a', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Live</span>
+                    </div>
+                    <span style={{ fontFamily: 'var(--font-primary)', fontSize: '11px', color: 'var(--color-text-muted)' }}>
+                        {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
                 </div>
             </div>
             {/* Dashboard */}
