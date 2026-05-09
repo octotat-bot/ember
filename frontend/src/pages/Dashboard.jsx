@@ -65,6 +65,39 @@ const MiniStat = ({ icon: MiniIcon, label, value, color = 'var(--color-primary)'
     </div>
 );
 
+// ─── Helper: elapsed time ────────────────────────────
+const useElapsed = (createdAt) => {
+    const [now, setNow] = useState(new Date());
+    useEffect(() => {
+        const t = setInterval(() => setNow(new Date()), 30000);
+        return () => clearInterval(t);
+    }, []);
+    return createdAt ? Math.floor((now - new Date(createdAt)) / 60000) : 0;
+};
+
+const WaitChip = ({ minutes }) => {
+    const col = minutes > 20 ? '#dc2626' : minutes > 12 ? '#d97706' : minutes > 6 ? '#C8975A' : '#5a9e5a';
+    return (
+        <span style={{ fontSize: '10px', fontWeight: 700, color: col, background: `${col}18`, borderRadius: '3px', padding: '2px 6px', fontFamily: 'var(--font-primary)' }}>
+            {minutes}m
+        </span>
+    );
+};
+
+const priorityBorder = (order) => {
+    if (order.priority === 'urgent') return '#dc2626';
+    if (order.priority === 'high') return '#d97706';
+    return 'transparent';
+};
+
+const itemsPreview = (items = []) => {
+    const active = items.filter(i => i.itemStatus !== 'cancelled');
+    if (!active.length) return 'No items';
+    const names = active.slice(0, 2).map(i => `${i.quantity > 1 ? i.quantity + 'x ' : ''}${i.name}`);
+    const extra = active.length - 2;
+    return names.join(', ') + (extra > 0 ? ` +${extra}` : '');
+};
+
 const OrderRow = ({ order }) => {
     const getBadgeStyle = (status) => {
         const base = {
@@ -85,36 +118,41 @@ const OrderRow = ({ order }) => {
         }
     };
 
+    const elapsed = useElapsed(order.createdAt);
     return (
         <div style={{
-            padding: '1rem', borderBottom: '0.5px solid var(--color-border)',
-            transition: 'background 0.2s', margin: '0 -0.5rem',
-            background: 'transparent', cursor: 'pointer'
+            padding: '0.85rem 0.75rem',
+            borderBottom: '0.5px solid var(--color-border)',
+            borderLeft: `3px solid ${priorityBorder(order)}`,
+            transition: 'background 0.2s',
+            background: 'transparent', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem',
         }} className="order-row-hover">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', minWidth: 0, flex: 1 }}>
                 <div style={{
-                    width: 42, height: 42, borderRadius: '4px',
-                    background: 'var(--color-bg-hover)', border: 'none',
+                    width: 40, height: 40, borderRadius: '4px',
+                    background: 'var(--color-bg-hover)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontWeight: 600, fontSize: '11px', flexShrink: 0,
-                    color: 'var(--color-text-muted)', fontFamily: 'var(--font-primary)'
+                    fontWeight: 700, fontSize: '13px', flexShrink: 0,
+                    color: 'var(--color-text)', fontFamily: 'var(--font-secondary)'
                 }}>
-                    T{order.tableNumber}
+                    {order.tableNumber}
                 </div>
                 <div style={{ minWidth: 0 }}>
-                    <div style={{ fontWeight: 500, fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--color-text)', fontFamily: 'var(--font-primary)' }}>
-                        {order.orderNumber}
+                    <div style={{ fontWeight: 600, fontSize: '13px', color: 'var(--color-text)', fontFamily: 'var(--font-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {itemsPreview(order.items)}
                     </div>
-                    <div style={{ fontSize: '11px', color: '#6B6460', marginTop: '0.2rem', fontFamily: 'var(--font-primary)' }}>
-                        {order.items?.length || 0} ITEMS
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
+                        <span style={{ fontSize: '10px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-primary)' }}>{order.orderNumber}</span>
+                        {order.waiter?.name && <span style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>· {order.waiter.name}</span>}
+                        {order.specialRequests && <span title={order.specialRequests} style={{ fontSize: '11px' }}>🔥</span>}
                     </div>
                 </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexShrink: 0 }}>
-                <span style={{ fontWeight: 500, fontSize: '14px', color: 'var(--color-text)', fontFamily: 'var(--font-secondary)' }}>₹{order.totalAmount?.toFixed(0)}</span>
-                <span style={getBadgeStyle(order.status)}>
-                    {order.status}
-                </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexShrink: 0 }}>
+                <WaitChip minutes={elapsed} />
+                <span style={{ fontWeight: 700, fontSize: '13px', color: 'var(--color-primary)', fontFamily: 'var(--font-secondary)' }}>₹{order.totalAmount?.toFixed(0)}</span>
+                <span style={getBadgeStyle(order.status)}>{order.status}</span>
             </div>
         </div>
     );
@@ -186,32 +224,44 @@ const roleConfig = {
 //  ADMIN BENTO
 // ═══════════════════════════════════════════════════════════
 const FullTicketRow = ({ order }) => {
+    const elapsed = useElapsed(order.createdAt);
     const bgColors = { pending: 'rgba(107,100,96,0.1)', preparing: 'rgba(90,122,200,0.12)', ready: 'rgba(200,151,90,0.15)', partially_served: 'rgba(90,158,174,0.1)', served: 'rgba(107,100,96,0.1)', completed: 'rgba(90,158,90,0.1)', cancelled: 'rgba(107,100,96,0.08)' };
     const textColors = { pending: 'var(--color-text-muted)', preparing: '#3d5aa0', ready: '#a06a20', partially_served: '#3d7a8a', served: 'var(--color-text-muted)', completed: '#3d8a3d', cancelled: 'var(--color-text-muted)' };
 
     return (
-        <div style={{ display: 'flex', alignItems: 'center', padding: '16px 0', borderBottom: '0.5px solid var(--color-border)' }}>
-            <div style={{ width: '80px', fontFamily: 'var(--font-secondary)', fontSize: '28px', color: 'var(--color-text)', flexShrink: 0 }}>
+        <div style={{
+            display: 'flex', alignItems: 'flex-start', padding: '14px 0',
+            borderBottom: '0.5px solid var(--color-border)',
+            borderLeft: `3px solid ${priorityBorder(order)}`,
+            paddingLeft: order.priority && order.priority !== 'normal' ? '10px' : '0',
+            transition: 'background 0.18s',
+        }} className="order-row-hover">
+            {/* Table number */}
+            <div style={{ width: '52px', fontFamily: 'var(--font-secondary)', fontSize: '26px', color: 'var(--color-text)', flexShrink: 0, lineHeight: 1 }}>
                 {order.tableNumber}
             </div>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
-                <div style={{ fontFamily: 'var(--font-primary)', fontSize: '11px', color: '#6B6460', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{order.orderNumber}</div>
-                <div style={{ fontFamily: 'var(--font-primary)', fontSize: '13px', color: '#E8E0D8' }}>
-                    {order.items?.length || 0} ITEMS
+            {/* Details */}
+            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                <div style={{ fontFamily: 'var(--font-primary)', fontSize: '12px', fontWeight: 600, color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {itemsPreview(order.items)}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ fontFamily: 'var(--font-primary)', fontSize: '10px', color: '#6B6460' }}>{order.orderNumber}</span>
+                    {order.waiter?.name && <span style={{ fontSize: '10px', color: '#9C8B7A' }}>· {order.waiter.name}</span>}
+                    {order.specialRequests && <span title={order.specialRequests} style={{ fontSize: '11px' }}>🔥</span>}
                 </div>
             </div>
-            <div style={{ width: '80px', textAlign: 'right', fontFamily: 'var(--font-primary)', fontSize: '15px', fontWeight: 600, color: 'var(--color-text)', flexShrink: 0, letterSpacing: '0.02em' }}>
-                ₹{order.totalAmount?.toFixed(0)}
-            </div>
-            <div style={{ width: '90px', textAlign: 'center', flexShrink: 0, paddingLeft: '16px' }}>
+            {/* Right side */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px', flexShrink: 0, paddingLeft: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <WaitChip minutes={elapsed} />
+                    <span style={{ fontFamily: 'var(--font-primary)', fontSize: '14px', fontWeight: 700, color: 'var(--color-primary)' }}>₹{order.totalAmount?.toFixed(0)}</span>
+                </div>
                 <span style={{
-                    padding: '3px 8px',
-                    fontSize: '9px',
-                    fontFamily: 'var(--font-primary)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.04em',
-                    color: textColors[order.status] || '#E8E0D8',
-                    background: bgColors[order.status] || '#2E2B28',
+                    padding: '2px 7px', fontSize: '9px', fontFamily: 'var(--font-primary)',
+                    textTransform: 'uppercase', letterSpacing: '0.04em',
+                    color: textColors[order.status] || 'var(--color-text-muted)',
+                    background: bgColors[order.status] || 'rgba(107,100,96,0.1)',
                     borderRadius: '2px'
                 }}>{order.status}</span>
             </div>
@@ -244,8 +294,55 @@ const AdminDashboard = ({ recentOrders, tableSummary, stats, onlineUsers, loadin
         }
     };
 
+    // Stats derived from orders
+    const todayRevenue = recentOrders.filter(o => o.status === 'completed').reduce((s, o) => s + (o.totalAmount || 0), 0);
+    const preparingCount = recentOrders.filter(o => o.status === 'preparing').length;
+    const completedCount = recentOrders.filter(o => o.status === 'completed').length;
+
+    // Activity feed: sort all orders by updatedAt desc
+    const activityFeed = [...recentOrders]
+        .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+        .slice(0, 5);
+
+    const activityLabel = (o) => {
+        if (o.status === 'completed') return `Table ${o.tableNumber} · Payment received · ₹${o.totalAmount?.toFixed(0)}`;
+        if (o.status === 'ready') return `Table ${o.tableNumber} · Order ready to serve`;
+        if (o.status === 'preparing') return `Table ${o.tableNumber} · Now preparing`;
+        if (o.status === 'pending') return `Table ${o.tableNumber} · New order placed`;
+        return `Table ${o.tableNumber} · ${o.status}`;
+    };
+
+    const activityColor = (o) => {
+        if (o.status === 'completed') return '#5a9e5a';
+        if (o.status === 'ready') return '#5a9e5a';
+        if (o.status === 'preparing') return '#C8975A';
+        if (o.status === 'pending') return '#dc2626';
+        return 'var(--color-text-muted)';
+    };
+
+    const minutesAgo = (ts) => {
+        const m = Math.floor((Date.now() - new Date(ts)) / 60000);
+        return m < 1 ? 'just now' : `${m}m ago`;
+    };
+
     return (
-        <div style={{ display: 'flex', width: '100%', height: '100%' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', gap: 0 }}>
+            {/* Stats Bar */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '16px' }}>
+                {[
+                    { label: 'REVENUE TODAY', value: `₹${todayRevenue.toFixed(0)}`, color: '#5a9e5a' },
+                    { label: 'TOTAL ORDERS', value: recentOrders.length, color: 'var(--color-text)' },
+                    { label: 'PREPARING', value: preparingCount, color: '#C8975A' },
+                    { label: 'COMPLETED', value: completedCount, color: '#5a9e5a' },
+                ].map(s => (
+                    <div key={s.label} style={{ background: '#fff', border: '0.5px solid var(--color-border)', borderRadius: '6px', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '4px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                        <div style={{ fontFamily: 'var(--font-primary)', fontSize: '9px', color: '#9C8B7A', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{s.label}</div>
+                        <div style={{ fontFamily: 'var(--font-secondary)', fontSize: '22px', color: s.color, lineHeight: 1, fontWeight: 400 }}>{s.value}</div>
+                    </div>
+                ))}
+            </div>
+            {/* Main Panel */}
+        <div style={{ display: 'flex', width: '100%', flex: 1 }}>
             {/* Left Panel - Live Tickets */}
             <div style={{ flex: '0 0 55%', borderRight: '0.5px solid var(--color-border)', display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <div style={{ padding: '0 0 16px 0', fontFamily: 'var(--font-primary)', fontSize: '9px', textTransform: 'uppercase', color: '#6B6460', letterSpacing: '0.08em' }}>
@@ -275,33 +372,26 @@ const AdminDashboard = ({ recentOrders, tableSummary, stats, onlineUsers, loadin
                     </div>
                 </div>
 
-                {/* Bottom Half */}
-                <div style={{ height: '160px', paddingLeft: '24px', display: 'flex' }}>
-                    <div style={{ flex: 1, borderRight: '0.5px solid var(--color-border)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                        <div style={{ fontFamily: 'var(--font-secondary)', fontSize: '52px', color: 'var(--color-text)', lineHeight: 1 }}>
-                            {recentOrders.filter(o => o.status === 'preparing').length}
+                {/* Bottom Half — Activity Feed */}
+                <div style={{ paddingLeft: '24px', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto' }}>
+                    <div style={{ fontFamily: 'var(--font-primary)', fontSize: '9px', textTransform: 'uppercase', color: '#9C8B7A', letterSpacing: '0.08em', marginBottom: '4px' }}>LIVE ACTIVITY</div>
+                    {activityFeed.map(o => (
+                        <div key={o._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                                <div style={{ width: 6, height: 6, borderRadius: '50%', background: activityColor(o), flexShrink: 0 }} />
+                                <span style={{ fontFamily: 'var(--font-primary)', fontSize: '11px', color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{activityLabel(o)}</span>
+                            </div>
+                            <span style={{ fontFamily: 'var(--font-primary)', fontSize: '10px', color: '#9C8B7A', flexShrink: 0 }}>{minutesAgo(o.updatedAt)}</span>
                         </div>
-                        <div style={{ fontFamily: 'var(--font-primary)', fontSize: '9px', color: '#6B6460', letterSpacing: '0.08em', marginTop: '8px' }}>
-                            PREPARING
-                        </div>
-                    </div>
-                    
-                    <div style={{ flex: 1, borderRight: '0.5px solid var(--color-border)', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingLeft: '24px' }}>
-                        <div style={{ fontFamily: 'var(--font-secondary)', fontSize: '52px', color: 'var(--color-text)', lineHeight: 1 }}>
-                            {tableSummary?.occupied || 0}
-                        </div>
-                        <div style={{ fontFamily: 'var(--font-primary)', fontSize: '9px', color: '#6B6460', letterSpacing: '0.08em', marginTop: '8px' }}>
-                            OCCUPIED
-                        </div>
-                    </div>
-
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingLeft: '24px', gap: '16px' }}>
-                        <div onClick={() => navigate('/orders')} style={{ cursor: 'pointer', fontFamily: 'var(--font-primary)', fontSize: '12px', color: '#C8975A', textTransform: 'uppercase', letterSpacing: '0.08em' }}>NEW ORDER</div>
-                        <div onClick={() => navigate('/kitchen')} style={{ cursor: 'pointer', fontFamily: 'var(--font-primary)', fontSize: '12px', color: '#6B6460', textTransform: 'uppercase', letterSpacing: '0.08em', transition: 'color 0.2s' }} onMouseOver={e => e.target.style.color = '#C8975A'} onMouseOut={e => e.target.style.color = '#6B6460'}>KITCHEN VIEW</div>
-                        <div onClick={() => navigate('/billing')} style={{ cursor: 'pointer', fontFamily: 'var(--font-primary)', fontSize: '12px', color: '#6B6460', textTransform: 'uppercase', letterSpacing: '0.08em', transition: 'color 0.2s' }} onMouseOver={e => e.target.style.color = '#C8975A'} onMouseOut={e => e.target.style.color = '#6B6460'}>BILLING</div>
+                    ))}
+                    <div style={{ borderTop: '0.5px solid var(--color-border)', marginTop: '8px', paddingTop: '12px', display: 'flex', gap: '16px' }}>
+                        <div onClick={() => navigate('/orders')} style={{ cursor: 'pointer', fontFamily: 'var(--font-primary)', fontSize: '11px', color: '#C8975A', textTransform: 'uppercase', letterSpacing: '0.08em' }}>NEW ORDER</div>
+                        <div onClick={() => navigate('/kitchen')} style={{ cursor: 'pointer', fontFamily: 'var(--font-primary)', fontSize: '11px', color: '#9C8B7A', textTransform: 'uppercase', letterSpacing: '0.08em', transition: 'color 0.2s' }} onMouseOver={e => e.target.style.color = '#C8975A'} onMouseOut={e => e.target.style.color = '#9C8B7A'}>KITCHEN</div>
+                        <div onClick={() => navigate('/billing')} style={{ cursor: 'pointer', fontFamily: 'var(--font-primary)', fontSize: '11px', color: '#9C8B7A', textTransform: 'uppercase', letterSpacing: '0.08em', transition: 'color 0.2s' }} onMouseOver={e => e.target.style.color = '#C8975A'} onMouseOut={e => e.target.style.color = '#9C8B7A'}>BILLING</div>
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     );
 };
@@ -668,9 +758,23 @@ const Dashboard = () => {
         }
     };
 
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
     return (
         <Layout>
-            {/* Split Panel */}
+            {/* Greeting Header */}
+            <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                    <div style={{ fontFamily: 'var(--font-primary)', fontSize: '11px', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{greeting}, {user?.name?.split(' ')[0] || user?.username || 'there'} 👋</div>
+                    <div style={{ fontFamily: 'var(--font-primary)', fontSize: '10px', color: 'var(--color-text-muted)', marginTop: '2px' }}>{config.subtitle}</div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#5a9e5a', animation: 'pulse-badge 2s infinite' }} />
+                    <span style={{ fontFamily: 'var(--font-primary)', fontSize: '10px', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Live</span>
+                </div>
+            </div>
+            {/* Dashboard */}
             {renderDashboard()}
 
             {/* Scoped styles */}
