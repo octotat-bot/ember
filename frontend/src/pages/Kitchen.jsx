@@ -394,51 +394,35 @@ const Kitchen = () => {
 
     return (
         <Layout title="Kitchen Display">
-            {/* ── Stats + Filters ──────────────────────── */}
-            <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                marginBottom: 'var(--spacing-xl)', flexWrap: 'wrap', gap: 'var(--spacing-md)',
-            }}>
-                {/* Counters */}
-                <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
-                    <div style={{
-                        background: 'var(--color-bg-card)', border: '1px solid var(--color-border)',
-                        borderRadius: 'var(--radius-md)', padding: 'var(--spacing-md) var(--spacing-lg)',
-                        display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)',
-                    }}>
-                        <Clock size={24} style={{ color: 'var(--color-warning)' }} />
-                        <div>
-                            <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{newCount}</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>New Orders</div>
-                        </div>
-                    </div>
-                    <div style={{
-                        background: 'var(--color-bg-card)', border: '1px solid var(--color-border)',
-                        borderRadius: 'var(--radius-md)', padding: 'var(--spacing-md) var(--spacing-lg)',
-                        display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)',
-                    }}>
-                        <ChefHat size={24} style={{ color: '#C8975A' }} />
-                        <div>
-                            <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{preparingCount}</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Preparing</div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Filters */}
-                <div style={{ display: 'flex', gap: 'var(--spacing-xs)', flexWrap: 'wrap' }}>
-                    {[
-                        { key: 'all', label: `All (${orders.length})` },
-                        { key: 'new', label: `New (${newCount})` },
-                        { key: 'preparing', label: `Preparing (${preparingCount})` },
-                    ].map((f) => (
-                        <button key={f.key} className={`btn ${filter === f.key ? 'btn-primary' : 'btn-ghost'} btn-sm`} onClick={() => setFilter(f.key)}>
-                            {f.label}
-                        </button>
-                    ))}
-                    <button className="btn btn-ghost btn-sm" onClick={refetch}>Refresh</button>
-                </div>
+        <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            marginBottom: 'var(--spacing-xl)', flexWrap: 'wrap', gap: 'var(--spacing-sm)',
+        }}>
+            {/* Compact stat chips + filters in one row */}
+            <div style={{ display: 'flex', gap: 'var(--spacing-xs)', flexWrap: 'wrap', alignItems: 'center' }}>
+                {[
+                    { key: 'all', label: 'All', count: orders.length },
+                    { key: 'new', label: 'New', count: newCount, accent: '#dc2626' },
+                    { key: 'preparing', label: 'Preparing', count: preparingCount, accent: '#C8975A' },
+                ].map((f) => (
+                    <button
+                        key={f.key}
+                        className={`btn ${filter === f.key ? 'btn-primary' : 'btn-ghost'} btn-sm`}
+                        onClick={() => setFilter(f.key)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                        {f.label}
+                        <span style={{
+                            background: filter === f.key ? 'rgba(255,255,255,0.25)' : (f.accent ? `${f.accent}18` : 'var(--color-bg-hover)'),
+                            color: filter === f.key ? '#fff' : (f.accent || 'var(--color-text-muted)'),
+                            fontSize: '10px', fontWeight: 700,
+                            padding: '1px 6px', borderRadius: '4px', minWidth: '18px', textAlign: 'center',
+                        }}>{f.count}</span>
+                    </button>
+                ))}
+                <button className="btn btn-ghost btn-sm" onClick={refetch}>Refresh</button>
             </div>
+        </div>
 
             {/* ── Orders Grid ──────────────────────────── */}
             {loading ? (
