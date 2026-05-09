@@ -229,16 +229,27 @@ const Layout = ({ children }) => {
                         </div>
                     </div>
                 ) : (
-                    <div style={{ fontFamily: 'var(--font-primary)', fontSize: 9, color: 'var(--color-text-muted)', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.14em' }}>
-                        {pageName}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        <div style={{ fontFamily: 'var(--font-primary)', fontSize: 12, color: 'var(--color-text)', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                            {pageName}
+                        </div>
+                        {!isDashboard && (
+                            <button
+                                onClick={() => { const roleDefault = { admin: '/dashboard', waiter: '/orders', chef: '/kitchen', cashier: '/billing', runner: '/ready-orders' }; navigate(roleDefault[user?.role] || '/dashboard'); }}
+                                aria-label="Go back"
+                                style={{ pointerEvents: 'auto', background: 'none', border: 'none', padding: 0, display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontFamily: 'var(--font-primary)', fontSize: 10, color: 'var(--color-text-muted)', letterSpacing: '0.06em', transition: 'color 0.2s' }}
+                                onMouseOver={e => e.currentTarget.style.color = '#C8975A'}
+                                onMouseOut={e => e.currentTarget.style.color = 'var(--color-text-muted)'}
+                            >
+                                <ArrowLeft size={9} /> Back to Dashboard
+                            </button>
+                        )}
                     </div>
                 )}
             </div>
-            {!isDashboard && (
-                <button onClick={() => { const roleDefault = { admin: '/dashboard', waiter: '/orders', chef: '/kitchen', cashier: '/billing', runner: '/ready-orders' }; navigate(roleDefault[user?.role] || '/dashboard'); }} aria-label="Go back" style={{ position: 'fixed', top: previewRole ? 96 : 72, left: 24, zIndex: 100, pointerEvents: 'auto', background: 'none', border: 'none', padding: 0, display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontFamily: 'var(--font-primary)', fontSize: 11, color: 'var(--color-text-muted)', letterSpacing: '0.06em', textDecoration: 'none', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.color = '#C8975A'} onMouseOut={e => e.currentTarget.style.color = 'var(--color-text-muted)'}>
-                    <ArrowLeft size={10} /> BACK
-                </button>
-            )}
+
+            {/* Fixed separator line between header and content */}
+            <div style={{ position: 'fixed', top: previewRole ? 124 : 100, left: 0, right: 0, height: '0.5px', background: 'var(--color-border)', zIndex: 99, opacity: 0.7 }} />
 
             {/* Admin Identity Top-Right */}
             {user && (
@@ -380,7 +391,7 @@ const Layout = ({ children }) => {
             )}
 
             {/* Main Canvas Area */}
-            <div style={{ position: 'absolute', inset: 0, paddingTop: previewRole ? 134 : 110, paddingBottom: 96, paddingLeft: 24, paddingRight: 24, overflowY: 'auto', overflowX: 'hidden', boxSizing: 'border-box', transition: 'padding-top 0.2s' }}>
+            <div style={{ position: 'absolute', inset: 0, paddingTop: previewRole ? 140 : 116, paddingBottom: 96, paddingLeft: 24, paddingRight: 24, overflowY: 'auto', overflowX: 'hidden', boxSizing: 'border-box', transition: 'padding-top 0.2s' }}>
                 {children}
             </div>
 
