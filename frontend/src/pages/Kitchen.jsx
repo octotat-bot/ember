@@ -394,35 +394,35 @@ const Kitchen = () => {
 
     return (
         <Layout title="Kitchen Display">
-        <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            marginBottom: 'var(--spacing-xl)', flexWrap: 'wrap', gap: 'var(--spacing-sm)',
-        }}>
-            {/* Compact stat chips + filters in one row */}
-            <div style={{ display: 'flex', gap: 'var(--spacing-xs)', flexWrap: 'wrap', alignItems: 'center' }}>
-                {[
-                    { key: 'all', label: 'All', count: orders.length },
-                    { key: 'new', label: 'New', count: newCount, accent: '#dc2626' },
-                    { key: 'preparing', label: 'Preparing', count: preparingCount, accent: '#C8975A' },
-                ].map((f) => (
-                    <button
-                        key={f.key}
-                        className={`btn ${filter === f.key ? 'btn-primary' : 'btn-ghost'} btn-sm`}
-                        onClick={() => setFilter(f.key)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-                    >
-                        {f.label}
-                        <span style={{
-                            background: filter === f.key ? 'rgba(255,255,255,0.25)' : (f.accent ? `${f.accent}18` : 'var(--color-bg-hover)'),
-                            color: filter === f.key ? '#fff' : (f.accent || 'var(--color-text-muted)'),
-                            fontSize: '10px', fontWeight: 700,
-                            padding: '1px 6px', borderRadius: '4px', minWidth: '18px', textAlign: 'center',
-                        }}>{f.count}</span>
-                    </button>
-                ))}
-                <button className="btn btn-ghost btn-sm" onClick={refetch}>Refresh</button>
+            {/* ── Filters ──────────────────────────────── */}
+            <div style={{
+                display: 'flex', alignItems: 'center',
+                marginBottom: 'var(--spacing-xl)', flexWrap: 'wrap', gap: 'var(--spacing-sm)',
+            }}>
+                <div style={{ display: 'flex', gap: 'var(--spacing-xs)', flexWrap: 'wrap', alignItems: 'center' }}>
+                    {[
+                        { key: 'all', label: 'All', count: orders.length },
+                        { key: 'new', label: 'New', count: newCount, accent: '#dc2626' },
+                        { key: 'preparing', label: 'Preparing', count: preparingCount, accent: '#C8975A' },
+                    ].map((f) => (
+                        <button
+                            key={f.key}
+                            className={`btn ${filter === f.key ? 'btn-primary' : 'btn-ghost'} btn-sm`}
+                            onClick={() => setFilter(f.key)}
+                            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                        >
+                            {f.label}
+                            <span style={{
+                                background: filter === f.key ? 'rgba(255,255,255,0.25)' : (f.accent ? `${f.accent}18` : 'var(--color-bg-hover)'),
+                                color: filter === f.key ? '#fff' : (f.accent || 'var(--color-text-muted)'),
+                                fontSize: '10px', fontWeight: 700,
+                                padding: '1px 6px', borderRadius: '4px', minWidth: '18px', textAlign: 'center',
+                            }}>{f.count}</span>
+                        </button>
+                    ))}
+                    <button className="btn btn-ghost btn-sm" onClick={refetch}>Refresh</button>
+                </div>
             </div>
-        </div>
 
             {/* ── Orders Grid ──────────────────────────── */}
             {loading ? (
@@ -453,6 +453,7 @@ const Kitchen = () => {
                     </AnimatePresence>
                 </div>
             )}
+
         </Layout>
     );
 };
