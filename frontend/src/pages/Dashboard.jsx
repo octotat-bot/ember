@@ -77,33 +77,32 @@ const OrderRow = ({ order }) => {
             fontWeight: 600,
         };
         switch (status) {
-            case 'served': return { ...base, background: '#1a2e1a', color: '#5a9e5a' };
-            case 'partially_served': return { ...base, background: '#1a2a2e', color: '#5a9eae' };
-            case 'ready': return { ...base, background: '#1a2a1a', color: '#7ac87a' };
-            case 'preparing': return { ...base, background: '#2E2B28', color: '#C8975A' };
-            default: return { ...base, background: '#1a1a1a', color: '#6B6460' };
+            case 'served': return { ...base, background: 'rgba(90,158,90,0.12)', color: '#3d8a3d' };
+            case 'partially_served': return { ...base, background: 'rgba(90,158,174,0.12)', color: '#3d7a8a' };
+            case 'ready': return { ...base, background: 'rgba(90,158,90,0.15)', color: '#3d8a3d' };
+            case 'preparing': return { ...base, background: 'rgba(200,151,90,0.12)', color: '#a06a20' };
+            default: return { ...base, background: 'rgba(107,100,96,0.1)', color: '#6B6460' };
         }
     };
 
     return (
         <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '1rem', borderBottom: '0.5px solid #2E2B28',
+            padding: '1rem', borderBottom: '0.5px solid var(--color-border)',
             transition: 'background 0.2s', margin: '0 -0.5rem',
-            background: '#0F0E0D', cursor: 'pointer'
+            background: 'transparent', cursor: 'pointer'
         }} className="order-row-hover">
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', minWidth: 0 }}>
                 <div style={{
                     width: 42, height: 42, borderRadius: '4px',
-                    background: '#2E2B28', border: 'none',
+                    background: 'var(--color-bg-hover)', border: 'none',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontWeight: 600, fontSize: '11px', flexShrink: 0,
-                    color: '#6B6460', fontFamily: 'var(--font-primary)'
+                    color: 'var(--color-text-muted)', fontFamily: 'var(--font-primary)'
                 }}>
                     T{order.tableNumber}
                 </div>
                 <div style={{ minWidth: 0 }}>
-                    <div style={{ fontWeight: 500, fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#E8E0D8', fontFamily: 'var(--font-primary)' }}>
+                    <div style={{ fontWeight: 500, fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--color-text)', fontFamily: 'var(--font-primary)' }}>
                         {order.orderNumber}
                     </div>
                     <div style={{ fontSize: '11px', color: '#6B6460', marginTop: '0.2rem', fontFamily: 'var(--font-primary)' }}>
@@ -112,7 +111,7 @@ const OrderRow = ({ order }) => {
                 </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexShrink: 0 }}>
-                <span style={{ fontWeight: 500, fontSize: '14px', color: '#E8E0D8', fontFamily: 'var(--font-secondary)' }}>₹{order.totalAmount?.toFixed(0)}</span>
+                <span style={{ fontWeight: 500, fontSize: '14px', color: 'var(--color-text)', fontFamily: 'var(--font-secondary)' }}>₹{order.totalAmount?.toFixed(0)}</span>
                 <span style={getBadgeStyle(order.status)}>
                     {order.status}
                 </span>
@@ -128,8 +127,8 @@ const TableDonut = ({ summary }) => {
     const segments = [
         { label: 'Available', value: summary.available || 0, color: '#C8975A' },
         { label: 'Occupied', value: summary.occupied || 0, color: '#6B6460' },
-        { label: 'Reserved', value: summary.reserved || 0, color: '#2E2B28' },
-        { label: 'Cleaning', value: summary.cleaning || 0, color: '#2E2B28' },
+        { label: 'Reserved', value: summary.reserved || 0, color: '#5a7ac8' },
+        { label: 'Cleaning', value: summary.cleaning || 0, color: 'var(--color-text-muted)' },
     ];
     return (
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
@@ -157,7 +156,7 @@ const TableDonut = ({ summary }) => {
                     position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
                     alignItems: 'center', justifyContent: 'center',
                 }}>
-                    <span style={{ fontWeight: 700, fontSize: '22px', fontFamily: 'var(--font-secondary)', color: '#F5EFE6', lineHeight: 1 }}>{total}</span>
+                    <span style={{ fontWeight: 700, fontSize: '22px', fontFamily: 'var(--font-secondary)', color: 'var(--color-text)', lineHeight: 1 }}>{total}</span>
                 </div>
             </div>
             {/* Legend */}
@@ -187,12 +186,12 @@ const roleConfig = {
 //  ADMIN BENTO
 // ═══════════════════════════════════════════════════════════
 const FullTicketRow = ({ order }) => {
-    const bgColors = { pending: '#2E2B28', preparing: '#5a7ac8', ready: '#C8975A', partially_served: '#1a2a2e', served: '#6B6460', completed: '#1a2e1a', cancelled: '#2E2B28' };
-    const textColors = { pending: '#E8E0D8', preparing: '#F5EFE6', ready: '#0F0E0D', partially_served: '#5a9eae', served: '#F5EFE6', completed: '#5a9e5a', cancelled: '#6B6460' };
+    const bgColors = { pending: 'rgba(107,100,96,0.1)', preparing: 'rgba(90,122,200,0.12)', ready: 'rgba(200,151,90,0.15)', partially_served: 'rgba(90,158,174,0.1)', served: 'rgba(107,100,96,0.1)', completed: 'rgba(90,158,90,0.1)', cancelled: 'rgba(107,100,96,0.08)' };
+    const textColors = { pending: 'var(--color-text-muted)', preparing: '#3d5aa0', ready: '#a06a20', partially_served: '#3d7a8a', served: 'var(--color-text-muted)', completed: '#3d8a3d', cancelled: 'var(--color-text-muted)' };
 
     return (
-        <div style={{ display: 'flex', alignItems: 'center', padding: '16px 0', borderBottom: '0.5px solid #2E2B28' }}>
-            <div style={{ width: '80px', fontFamily: 'var(--font-secondary)', fontSize: '28px', color: '#F5EFE6', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', padding: '16px 0', borderBottom: '0.5px solid var(--color-border)' }}>
+            <div style={{ width: '80px', fontFamily: 'var(--font-secondary)', fontSize: '28px', color: 'var(--color-text)', flexShrink: 0 }}>
                 {order.tableNumber}
             </div>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
@@ -201,7 +200,7 @@ const FullTicketRow = ({ order }) => {
                     {order.items?.length || 0} ITEMS
                 </div>
             </div>
-            <div style={{ width: '80px', textAlign: 'right', fontFamily: 'var(--font-primary)', fontSize: '15px', fontWeight: 600, color: '#E8E0D8', flexShrink: 0, letterSpacing: '0.02em' }}>
+            <div style={{ width: '80px', textAlign: 'right', fontFamily: 'var(--font-primary)', fontSize: '15px', fontWeight: 600, color: 'var(--color-text)', flexShrink: 0, letterSpacing: '0.02em' }}>
                 ₹{order.totalAmount?.toFixed(0)}
             </div>
             <div style={{ width: '90px', textAlign: 'center', flexShrink: 0, paddingLeft: '16px' }}>
@@ -241,14 +240,14 @@ const AdminDashboard = ({ recentOrders, tableSummary, stats, onlineUsers, loadin
             case 'occupied': return '#C8975A';
             case 'reserved': return '#5a7ac8';
             case 'cleaning': return '#6B6460';
-            default: return '#2E2B28';
+            default: return 'var(--color-border)';
         }
     };
 
     return (
         <div style={{ display: 'flex', width: '100%', height: '100%' }}>
             {/* Left Panel - Live Tickets */}
-            <div style={{ flex: '0 0 55%', borderRight: '0.5px solid #2E2B28', display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <div style={{ flex: '0 0 55%', borderRight: '0.5px solid var(--color-border)', display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <div style={{ padding: '0 0 16px 0', fontFamily: 'var(--font-primary)', fontSize: '9px', textTransform: 'uppercase', color: '#6B6460', letterSpacing: '0.08em' }}>
                     TICKETS
                 </div>
@@ -260,16 +259,16 @@ const AdminDashboard = ({ recentOrders, tableSummary, stats, onlineUsers, loadin
             {/* Right Panel */}
             <div style={{ flex: '0 0 45%', display: 'flex', flexDirection: 'column', height: '100%' }}>
                 {/* Top Half */}
-                <div style={{ flex: 1, borderBottom: '0.5px solid #2E2B28', paddingLeft: '24px', display: 'flex', flexDirection: 'column', paddingBottom: '24px' }}>
+                <div style={{ flex: 1, borderBottom: '0.5px solid var(--color-border)', paddingLeft: '24px', display: 'flex', flexDirection: 'column', paddingBottom: '24px' }}>
                     <div style={{ display: 'flex', gap: '12px', fontFamily: 'var(--font-primary)', fontSize: '9px', textTransform: 'uppercase', color: '#6B6460', marginBottom: '16px' }}>
                         <span><span style={{color: '#C8975A'}}>●</span> OCCUPIED</span>
                         <span><span style={{color: '#5a7ac8'}}>●</span> RESERVED</span>
                         <span><span style={{color: '#6B6460'}}>●</span> CLEANING</span>
-                        <span><span style={{color: '#2E2B28'}}>●</span> AVAILABLE</span>
+                        <span><span style={{color: '#DDD0C0'}}>●</span> AVAILABLE</span>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, 64px)', gap: '12px', overflowY: 'auto', alignContent: 'start' }}>
                         {tablesList.map(t => (
-                            <div key={t.number} style={{ width: 64, height: 64, background: '#1C1A18', border: `1px solid ${getTableBorder(t.status)}`, borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-secondary)', fontSize: '20px', color: '#F5EFE6' }}>
+                            <div key={t.number} style={{ width: 64, height: 64, background: '#fff', border: `1px solid ${getTableBorder(t.status)}`, borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-secondary)', fontSize: '20px', color: 'var(--color-text)' }}>
                                 {t.number}
                             </div>
                         ))}
@@ -278,8 +277,8 @@ const AdminDashboard = ({ recentOrders, tableSummary, stats, onlineUsers, loadin
 
                 {/* Bottom Half */}
                 <div style={{ height: '160px', paddingLeft: '24px', display: 'flex' }}>
-                    <div style={{ flex: 1, borderRight: '0.5px solid #2E2B28', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                        <div style={{ fontFamily: 'var(--font-secondary)', fontSize: '52px', color: '#F5EFE6', lineHeight: 1 }}>
+                    <div style={{ flex: 1, borderRight: '0.5px solid var(--color-border)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                        <div style={{ fontFamily: 'var(--font-secondary)', fontSize: '52px', color: 'var(--color-text)', lineHeight: 1 }}>
                             {recentOrders.filter(o => o.status === 'preparing').length}
                         </div>
                         <div style={{ fontFamily: 'var(--font-primary)', fontSize: '9px', color: '#6B6460', letterSpacing: '0.08em', marginTop: '8px' }}>
@@ -287,8 +286,8 @@ const AdminDashboard = ({ recentOrders, tableSummary, stats, onlineUsers, loadin
                         </div>
                     </div>
                     
-                    <div style={{ flex: 1, borderRight: '0.5px solid #2E2B28', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingLeft: '24px' }}>
-                        <div style={{ fontFamily: 'var(--font-secondary)', fontSize: '52px', color: '#F5EFE6', lineHeight: 1 }}>
+                    <div style={{ flex: 1, borderRight: '0.5px solid var(--color-border)', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingLeft: '24px' }}>
+                        <div style={{ fontFamily: 'var(--font-secondary)', fontSize: '52px', color: 'var(--color-text)', lineHeight: 1 }}>
                             {tableSummary?.occupied || 0}
                         </div>
                         <div style={{ fontFamily: 'var(--font-primary)', fontSize: '9px', color: '#6B6460', letterSpacing: '0.08em', marginTop: '8px' }}>
@@ -678,18 +677,20 @@ const Dashboard = () => {
             <style>{`
 
                 .bento-cell {
-                    background: #1C1A18;
+                    background: #fff;
                     border-radius: 6px;
-                    border: 0.5px solid #2E2B28;
+                    border: 0.5px solid var(--color-border);
                     padding: 1.75rem;
                     position: relative;
                     overflow: hidden;
                     transition: all 0.2s ease;
                     display: flex;
                     flex-direction: column;
+                    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
                 }
                 .bento-cell:hover {
-                    border-color: #C8975A;
+                    border-color: var(--color-primary);
+                    box-shadow: 0 4px 12px rgba(200,151,90,0.08);
                 }
                 .bento-hoverable:hover {
                     border-color: var(--accent);
@@ -710,7 +711,7 @@ const Dashboard = () => {
                 .bento-stat-value {
                     font-size: 28px;
                     font-family: var(--font-secondary);
-                    color: #F5EFE6;
+                    color: var(--color-text);
                     font-weight: 400;
                     line-height: 1;
                     margin-top: auto;
@@ -738,19 +739,19 @@ const Dashboard = () => {
                 }
                 
                 .order-row-hover:hover {
-                    background: #1C1A18 !important;
+                    background: var(--color-bg-hover) !important;
                 }
                 
                 .dashboard-link {
                     background: transparent !important;
                     border: none !important;
                     box-shadow: none !important;
-                    color: #6B6460 !important;
+                    color: var(--color-text-muted) !important;
                 }
                 .dashboard-link:hover {
                     background: transparent !important;
                     border: none !important;
-                    color: #E8E0D8 !important;
+                    color: var(--color-text) !important;
                 }
 
                 @media (max-width: 900px) {

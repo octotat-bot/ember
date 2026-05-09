@@ -43,8 +43,8 @@ const ITEM_BUTTON_CONFIG = {
     },
     served: {
         label: 'SERVED',
-        color: '#2E2B28',
-        bg: 'rgba(46, 43, 40, 0.10)',
+        color: 'var(--color-text-muted)',
+        bg: 'rgba(107, 100, 96, 0.08)',
         nextStatus: null,
         isButton: false,
     },
@@ -201,7 +201,7 @@ const KitchenOrderCard = ({ order, onStatusChange, onItemStatusChange, updatingI
                             {/* Left: quantity + name */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)', flex: 1 }}>
                                 <span style={{
-                                    background: '#0A0A0A', color: 'white',
+                                    background: 'var(--color-primary)', color: '#fff',
                                     padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-full)',
                                     fontWeight: 700, fontSize: '0.85rem', flexShrink: 0,
                                 }}>

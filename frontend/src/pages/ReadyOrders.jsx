@@ -85,7 +85,7 @@ const ReadyOrders = () => {
                                 >
                                     {/* Header */}
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-md)' }}>
-                                        <span style={{ fontWeight: 600, color: '#0A0A0A' }}>{order.orderNumber}</span>
+                                        <span style={{ fontWeight: 600, color: 'var(--color-text)' }}>{order.orderNumber}</span>
                                         <span className={`badge status-${order.status}`}>
                                             {(order.status || '').replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase())}
                                         </span>
@@ -140,7 +140,7 @@ const ReadyOrders = () => {
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
                                                         <span style={{
                                                             fontWeight: 700, fontSize: '0.85rem',
-                                                            background: '#0A0A0A', color: 'white',
+                                                            background: 'var(--color-primary)', color: '#fff',
                                                             padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-full)',
                                                         }}>
                                                             {item.quantity}x

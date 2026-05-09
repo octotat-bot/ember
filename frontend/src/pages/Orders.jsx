@@ -271,7 +271,7 @@ const ItemProgressBar = ({ items }) => {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <div style={{ width: 60, height: 6, background: '#2E2B28', borderRadius: 3, overflow: 'hidden', flexShrink: 0 }}>
+                <div style={{ width: 60, height: 6, background: 'var(--color-border)', borderRadius: 3, overflow: 'hidden', flexShrink: 0 }}>
                     <div style={{
                         height: '100%',
                         width: `${pct}%`,

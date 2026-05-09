@@ -57,10 +57,10 @@ const Dock = ({ activeRole }) => {
             transform: 'translateX(-50%)',
             height: 52,
             maxWidth: 'calc(100vw - 32px)',
-            background: '#1C1A18',
-            border: '0.5px solid #2E2B28',
+            background: '#2A2523',
+            border: '0.5px solid #3D3833',
             borderRadius: 14,
-            boxShadow: '0 0 0 1px #2E2B28',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
             padding: '0 24px',
             display: 'flex',
             alignItems: 'center',
@@ -179,14 +179,14 @@ const Layout = ({ children }) => {
     const activeRole = previewRole || user?.role || 'waiter';
 
     return (
-        <div style={{ backgroundColor: '#0F0E0D', minHeight: '100vh', width: '100vw', margin: 0, padding: 0, overflow: 'hidden', position: 'relative' }}>
+        <div style={{ backgroundColor: 'var(--bg-canvas)', minHeight: '100vh', width: '100vw', margin: 0, padding: 0, overflow: 'hidden', position: 'relative' }}>
             <style>{`
-                .dock-item:hover .dock-icon { color: #E8E0D8 !important; }
-                .dock-item:hover .dock-label { color: #E8E0D8 !important; }
+                .dock-item:hover .dock-icon { color: #F5EFE6 !important; }
+                .dock-item:hover .dock-label { color: #F5EFE6 !important; }
             `}</style>
 
             {previewRole && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 24, borderTop: '2px solid #C8975A', background: '#1C1A18', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 24, borderTop: '2px solid #C8975A', background: '#2A2523', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
                     <span style={{ fontFamily: 'var(--font-primary)', fontSize: 10, color: '#C8975A', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                         VIEWING AS {previewRole}
                     </span>
@@ -198,17 +198,17 @@ const Layout = ({ children }) => {
             
             {/* Branding Top-Left Stack */}
             <div style={{ position: 'fixed', top: previewRole ? 44 : 20, left: 24, zIndex: 100, pointerEvents: 'none', display: 'flex', flexDirection: 'column', transition: 'top 0.2s' }}>
-                <div style={{ fontFamily: 'var(--font-secondary)', fontSize: 22, color: '#F5EFE6', fontWeight: 700, lineHeight: 1 }}>
+                <div style={{ fontFamily: 'var(--font-secondary)', fontSize: 22, color: 'var(--color-text)', fontWeight: 700, lineHeight: 1 }}>
                     Ember
                 </div>
             </div>
             <div style={{ position: 'fixed', top: previewRole ? 72 : 48, left: 24, zIndex: 100, pointerEvents: 'none', transition: 'top 0.2s' }}>
-                <div style={{ fontFamily: 'var(--font-primary)', fontSize: 9, color: '#6B6460', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.14em' }}>
+                <div style={{ fontFamily: 'var(--font-primary)', fontSize: 9, color: 'var(--color-text-muted)', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.14em' }}>
                     {pageName}
                 </div>
             </div>
             {!isDashboard && (
-                <button onClick={() => { const roleDefault = { admin: '/dashboard', waiter: '/orders', chef: '/kitchen', cashier: '/billing', runner: '/ready-orders' }; navigate(roleDefault[user?.role] || '/dashboard'); }} aria-label="Go back" style={{ position: 'fixed', top: previewRole ? 96 : 72, left: 24, zIndex: 100, pointerEvents: 'auto', background: 'none', border: 'none', padding: 0, display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontFamily: 'var(--font-primary)', fontSize: 11, color: '#6B6460', letterSpacing: '0.06em', textDecoration: 'none', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.color = '#C8975A'} onMouseOut={e => e.currentTarget.style.color = '#6B6460'}>
+                <button onClick={() => { const roleDefault = { admin: '/dashboard', waiter: '/orders', chef: '/kitchen', cashier: '/billing', runner: '/ready-orders' }; navigate(roleDefault[user?.role] || '/dashboard'); }} aria-label="Go back" style={{ position: 'fixed', top: previewRole ? 96 : 72, left: 24, zIndex: 100, pointerEvents: 'auto', background: 'none', border: 'none', padding: 0, display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontFamily: 'var(--font-primary)', fontSize: 11, color: 'var(--color-text-muted)', letterSpacing: '0.06em', textDecoration: 'none', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.color = '#C8975A'} onMouseOut={e => e.currentTarget.style.color = 'var(--color-text-muted)'}>
                     <ArrowLeft size={10} /> BACK
                 </button>
             )}
@@ -225,23 +225,23 @@ const Layout = ({ children }) => {
                         onClick={() => { setShowNotificationsList(!showNotificationsList); setShowDropdown(false); }}
                         onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowNotificationsList(!showNotificationsList); setShowDropdown(false); } }}
                     >
-                        <Bell size={18} color={showNotificationsList ? '#C8975A' : '#6B6460'} style={{ transition: 'color 0.2s' }} />
+                        <Bell size={18} color={showNotificationsList ? '#C8975A' : 'var(--color-text-muted)'} style={{ transition: 'color 0.2s' }} />
                         {unreadCount > 0 && (
-                            <div style={{ position: 'absolute', top: -4, right: -4, background: '#C8975A', color: '#0F0E0D', fontSize: 8, fontFamily: 'var(--font-primary)', fontWeight: 700, padding: '0 4px', borderRadius: 8 }}>
+                            <div style={{ position: 'absolute', top: -4, right: -4, background: '#C8975A', color: '#fff', fontSize: 8, fontFamily: 'var(--font-primary)', fontWeight: 700, padding: '0 4px', borderRadius: 8 }}>
                                 {unreadCount}
                             </div>
                         )}
 
                         {showNotificationsList && (
-                            <div onClick={e => e.stopPropagation()} style={{ position: 'absolute', top: 32, right: 0, background: '#1C1A18', border: '0.5px solid #2E2B28', borderRadius: 6, minWidth: 280, maxHeight: 400, overflowY: 'auto', zIndex: 200, display: 'flex', flexDirection: 'column' }}>
-                                <div style={{ padding: '12px 16px', borderBottom: '0.5px solid #2E2B28', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: '#1C1A18', zIndex: 2 }}>
-                                    <span style={{ fontFamily: 'var(--font-primary)', fontSize: 10, color: '#6B6460', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Notifications</span>
+                            <div onClick={e => e.stopPropagation()} style={{ position: 'absolute', top: 32, right: 0, background: '#fff', border: '0.5px solid var(--color-border)', borderRadius: 6, minWidth: 280, maxHeight: 400, overflowY: 'auto', zIndex: 200, display: 'flex', flexDirection: 'column', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}>
+                                <div style={{ padding: '12px 16px', borderBottom: '0.5px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: '#fff', zIndex: 2 }}>
+                                    <span style={{ fontFamily: 'var(--font-primary)', fontSize: 10, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Notifications</span>
                                     {notifications?.length > 0 && (
                                         <span onClick={() => markAllRead()} style={{ fontFamily: 'var(--font-primary)', fontSize: 9, color: '#C8975A', cursor: 'pointer', textTransform: 'uppercase' }}>Mark All Read</span>
                                     )}
                                 </div>
                                 {!notifications || notifications.length === 0 ? (
-                                    <div style={{ padding: '32px 16px', textAlign: 'center', fontFamily: 'var(--font-primary)', fontSize: 11, color: '#6B6460' }}>
+                                    <div style={{ padding: '32px 16px', textAlign: 'center', fontFamily: 'var(--font-primary)', fontSize: 11, color: 'var(--color-text-muted)' }}>
                                         No notifications yet
                                     </div>
                                 ) : (
@@ -249,13 +249,13 @@ const Layout = ({ children }) => {
                                         <div 
                                             key={n.id} 
                                             onClick={() => markNotificationRead(n.id)} 
-                                            style={{ padding: '12px 16px', borderBottom: '0.5px solid #2E2B28', background: n.read ? 'transparent' : '#242220', cursor: 'pointer', transition: 'background 0.2s' }}
-                                            onMouseOver={e => e.currentTarget.style.background = '#2E2B28'}
-                                            onMouseOut={e => e.currentTarget.style.background = n.read ? 'transparent' : '#242220'}
+                                            style={{ padding: '12px 16px', borderBottom: '0.5px solid var(--color-border)', background: n.read ? 'transparent' : 'rgba(200,151,90,0.04)', cursor: 'pointer', transition: 'background 0.2s' }}
+                                            onMouseOver={e => e.currentTarget.style.background = 'var(--color-bg-hover)'}
+                                            onMouseOut={e => e.currentTarget.style.background = n.read ? 'transparent' : 'rgba(200,151,90,0.04)'}
                                         >
-                                            <div style={{ fontFamily: 'var(--font-secondary)', fontSize: 13, color: '#F5EFE6', marginBottom: 4 }}>{n.title}</div>
-                                            <div style={{ fontFamily: 'var(--font-primary)', fontSize: 10, color: '#E8E0D8', lineHeight: 1.4 }}>{n.message}</div>
-                                            <div style={{ fontFamily: 'var(--font-primary)', fontSize: 8, color: '#6B6460', marginTop: 8 }}>
+                                            <div style={{ fontFamily: 'var(--font-secondary)', fontSize: 13, color: 'var(--color-text)', marginBottom: 4 }}>{n.title}</div>
+                                            <div style={{ fontFamily: 'var(--font-primary)', fontSize: 10, color: 'var(--color-text-secondary)', lineHeight: 1.4 }}>{n.message}</div>
+                                            <div style={{ fontFamily: 'var(--font-primary)', fontSize: 8, color: 'var(--color-text-muted)', marginTop: 8 }}>
                                                 {new Date(n.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                                             </div>
                                         </div>
@@ -270,26 +270,26 @@ const Layout = ({ children }) => {
                         style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}
                     >
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center' }}>
-                            <span style={{ fontFamily: 'var(--font-primary)', fontSize: 12, color: '#E8E0D8' }}>
+                            <span style={{ fontFamily: 'var(--font-primary)', fontSize: 12, color: 'var(--color-text)' }}>
                                 {user.name}
                             </span>
                             <span style={{ fontFamily: 'var(--font-primary)', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', padding: '2px 4px', borderRadius: 2, marginTop: 2, ...ROLE_COLORS[user.role] }}>
                                 {user.role}
                             </span>
                         </div>
-                        <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#2E2B28', color: '#E8E0D8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-primary)', fontSize: 13, fontWeight: 600 }}>
+                        <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--color-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-primary)', fontSize: 13, fontWeight: 600 }}>
                             {user.name?.charAt(0).toUpperCase() || 'A'}
                         </div>
                     </div>
 
                     {showDropdown && (
-                        <div style={{ position: 'absolute', top: 44, right: 0, background: '#1C1A18', border: '0.5px solid #2E2B28', borderRadius: 6, minWidth: 200, zIndex: 200, display: 'flex', flexDirection: 'column', overflow: 'visible' }}>
-                            <div style={{ padding: '12px 16px', borderBottom: '0.5px solid #2E2B28', display: 'flex', gap: 12, alignItems: 'center' }}>
-                                <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#2E2B28', color: '#E8E0D8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-primary)', fontSize: 10, fontWeight: 600 }}>
+                        <div style={{ position: 'absolute', top: 44, right: 0, background: '#fff', border: '0.5px solid var(--color-border)', borderRadius: 6, minWidth: 200, zIndex: 200, display: 'flex', flexDirection: 'column', overflow: 'visible', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}>
+                            <div style={{ padding: '12px 16px', borderBottom: '0.5px solid var(--color-border)', display: 'flex', gap: 12, alignItems: 'center' }}>
+                                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--color-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-primary)', fontSize: 10, fontWeight: 600 }}>
                                     {user.name?.charAt(0).toUpperCase() || 'A'}
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <span style={{ fontFamily: 'var(--font-primary)', fontSize: 12, color: '#E8E0D8' }}>{user.name}</span>
+                                    <span style={{ fontFamily: 'var(--font-primary)', fontSize: 12, color: 'var(--color-text)' }}>{user.name}</span>
                                     <span style={{ fontFamily: 'var(--font-primary)', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', paddingTop: 2, color: ROLE_COLORS[user.role]?.color }}>{user.role}</span>
                                 </div>
                             </div>
@@ -298,28 +298,28 @@ const Layout = ({ children }) => {
                                 <>
                                     <div 
                                         onClick={() => { navigate('/settings'); setShowDropdown(false); }}
-                                        style={{ padding: '12px 16px', borderBottom: '0.5px solid #2E2B28', fontFamily: 'var(--font-primary)', fontSize: 12, color: '#E8E0D8', cursor: 'pointer', transition: 'background 0.2s' }}
-                                        onMouseOver={e => e.currentTarget.style.background = '#2E2B28'}
+                                        style={{ padding: '12px 16px', borderBottom: '0.5px solid var(--color-border)', fontFamily: 'var(--font-primary)', fontSize: 12, color: 'var(--color-text)', cursor: 'pointer', transition: 'background 0.2s' }}
+                                        onMouseOver={e => e.currentTarget.style.background = 'var(--color-bg-hover)'}
                                         onMouseOut={e => e.currentTarget.style.background = 'transparent'}
                                     >
                                         Settings
                                     </div>
                                     <div 
-                                        style={{ padding: '12px 16px', borderBottom: '0.5px solid #2E2B28', fontFamily: 'var(--font-primary)', fontSize: 12, color: '#E8E0D8', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'background 0.2s', position: 'relative' }}
+                                        style={{ padding: '12px 16px', borderBottom: '0.5px solid var(--color-border)', fontFamily: 'var(--font-primary)', fontSize: 12, color: 'var(--color-text)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'background 0.2s', position: 'relative' }}
                                     onClick={(e) => { e.stopPropagation(); setShowRoles(!showRoles); }}
-                                    onMouseOver={e => e.currentTarget.style.background = '#2E2B28'}
+                                    onMouseOver={e => e.currentTarget.style.background = 'var(--color-bg-hover)'}
                                     onMouseOut={e => e.currentTarget.style.background = 'transparent'}
                                 >
                                     Switch Role <ArrowRight size={12} />
                                     
                                     {showRoles && (
-                                        <div style={{ position: 'absolute', top: 0, right: '100%', marginRight: 4, background: '#1C1A18', border: '0.5px solid #2E2B28', borderRadius: 6, width: 140, display: 'flex', flexDirection: 'column', padding: '4px 0', zIndex: 201 }}>
+                                        <div style={{ position: 'absolute', top: 0, right: '100%', marginRight: 4, background: '#fff', border: '0.5px solid var(--color-border)', borderRadius: 6, width: 140, display: 'flex', flexDirection: 'column', padding: '4px 0', zIndex: 201, boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
                                             {['admin', 'waiter', 'chef', 'cashier', 'runner'].map(r => (
                                                 <div 
                                                     key={r}
                                                     onClick={() => { setPreviewRole(r); setShowDropdown(false); setShowRoles(false); }}
-                                                    style={{ padding: '8px 16px', color: '#E8E0D8', fontFamily: 'var(--font-primary)', fontSize: 12, textTransform: 'capitalize' }}
-                                                    onMouseOver={e => e.currentTarget.style.background = '#2E2B28'}
+                                                    style={{ padding: '8px 16px', color: 'var(--color-text)', fontFamily: 'var(--font-primary)', fontSize: 12, textTransform: 'capitalize' }}
+                                                    onMouseOver={e => e.currentTarget.style.background = 'var(--color-bg-hover)'}
                                                     onMouseOut={e => e.currentTarget.style.background = 'transparent'}
                                                 >
                                                     {r}
@@ -334,7 +334,7 @@ const Layout = ({ children }) => {
                             <div 
                                 onClick={handleLogout}
                                 style={{ padding: '12px 16px', fontFamily: 'var(--font-primary)', fontSize: 12, color: '#e05a5a', cursor: 'pointer', transition: 'all 0.2s' }}
-                                onMouseOver={e => { e.currentTarget.style.background = '#2e1a1a'; }}
+                                onMouseOver={e => { e.currentTarget.style.background = 'rgba(224,90,90,0.06)'; }}
                                 onMouseOut={e => { e.currentTarget.style.background = 'transparent'; }}
                             >
                                 ← Logout
@@ -345,8 +345,8 @@ const Layout = ({ children }) => {
             )}
 
             {isLoggingOut && (
-                <div style={{ position: 'fixed', inset: 0, background: '#0F0E0D', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ fontFamily: 'var(--font-secondary)', fontSize: 18, color: '#6B6460' }}>
+                <div style={{ position: 'fixed', inset: 0, background: 'var(--bg-canvas)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ fontFamily: 'var(--font-secondary)', fontSize: 18, color: 'var(--color-text-muted)' }}>
                         Signing out...
                     </div>
                 </div>
