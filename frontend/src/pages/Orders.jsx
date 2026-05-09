@@ -128,23 +128,24 @@ const CreateOrderModal = ({ isOpen, onClose, onSubmit, existingOrder }) => {
                                     <label style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: 'var(--spacing-sm)', display: 'block' }}>Select Table</label>
                                     {tablesLoading ? (
                                         <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--spacing-md)' }}><InlineLoader /></div>
-                                ) : (
-                                    <div style={{ display: 'flex', gap: 'var(--spacing-xs)', flexWrap: 'wrap' }}>
-                                        {availableTables.map((table) => (
-                                            <motion.button key={table._id} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                                                className={`btn ${selectedTable?._id === table._id ? 'btn-primary' : 'btn-ghost'} btn-sm`}
-                                                onClick={() => setSelectedTable(table)}
-                                                style={{ gap: '0.25rem' }}>
-                                                <span style={{ fontWeight: 700 }}>{table.tableNumber}</span>
-                                                <span style={{ fontSize: '0.65rem', opacity: 0.7 }}>({table.capacity})</span>
-                                            </motion.button>
-                                        ))}
-                                        {availableTables.length === 0 && (
-                                            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
-                                                No available tables. Free up a table first.
-                                            </p>
-                                        )}
-                                    </div>
+                                    ) : (
+                                        <div style={{ display: 'flex', gap: 'var(--spacing-xs)', flexWrap: 'wrap' }}>
+                                            {availableTables.map((table) => (
+                                                <motion.button key={table._id} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                                                    className={`btn ${selectedTable?._id === table._id ? 'btn-primary' : 'btn-ghost'} btn-sm`}
+                                                    onClick={() => setSelectedTable(table)}
+                                                    style={{ gap: '0.25rem' }}>
+                                                    <span style={{ fontWeight: 700 }}>{table.tableNumber}</span>
+                                                    <span style={{ fontSize: '0.65rem', opacity: 0.7 }}>({table.capacity})</span>
+                                                </motion.button>
+                                            ))}
+                                            {availableTables.length === 0 && (
+                                                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                                                    No available tables. Free up a table first.
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
