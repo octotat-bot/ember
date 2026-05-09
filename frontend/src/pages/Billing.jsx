@@ -234,6 +234,8 @@ const InvoiceModal = ({ order, isOpen, onClose, onPayment, receiptConfig }) => {
     const [paymentMethod, setPaymentMethod] = useState('cash');
     const [discount, setDiscount] = useState(0);
     const [discountReason, setDiscountReason] = useState('');
+    const [isSplit, setIsSplit] = useState(false);
+    const [splitAmount, setSplitAmount] = useState('');
     const [loading, setLoading] = useState(false);
 
     if (!isOpen || !order) return null;
@@ -243,12 +245,26 @@ const InvoiceModal = ({ order, isOpen, onClose, onPayment, receiptConfig }) => {
     const maxDiscount = subtotal * 0.5;
     const discountAmt = Math.min(Math.max(parseFloat(discount) || 0, 0), maxDiscount);
     const total = Math.max(subtotal + tax - discountAmt, 0);
+    const remainingBalance = Math.max(total - (order.paidAmount || 0), 0);
+    
+    // Determine the amount to pay this transaction
+    const amountToPay = isSplit ? Math.min(Math.max(parseFloat(splitAmount) || 0, 0), remainingBalance) : remainingBalance;
 
     const handlePayment = async () => {
+        if (isSplit && (amountToPay <= 0 || amountToPay > remainingBalance)) {
+            toast.error('Please enter a valid split amount less than or equal to the remaining balance.');
+            return;
+        }
         setLoading(true);
         try {
-            await onPayment(order._id, { paymentMethod, paidAmount: total, discountAmount: discountAmt, discountReason });
-            onClose();
+            await onPayment(order._id, { paymentMethod, paidAmount: (order.paidAmount || 0) + amountToPay, discountAmount: discountAmt, discountReason });
+            if (amountToPay >= remainingBalance) {
+                onClose();
+            } else {
+                toast.success(`Partial payment of ₹${amountToPay.toFixed(0)} received.`);
+                setSplitAmount('');
+                setIsSplit(false);
+            }
         } catch (error) {
             toast.error(error.message || 'Payment failed. Please try again.');
         } finally {
@@ -300,6 +316,16 @@ const InvoiceModal = ({ order, isOpen, onClose, onPayment, receiptConfig }) => {
                         <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 'var(--spacing-md)', borderTop: '2px solid var(--color-border)', fontWeight: 700, fontSize: '1.25rem' }}>
                             <span>Total</span><span style={{ color: 'var(--color-success)' }}>₹{total.toFixed(0)}</span>
                         </div>
+                        {(order.paidAmount > 0) && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'var(--spacing-sm)', color: 'var(--color-primary)' }}>
+                                <span>Already Paid</span><span>-₹{order.paidAmount.toFixed(0)}</span>
+                            </div>
+                        )}
+                        {(order.paidAmount > 0) && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'var(--spacing-sm)', fontWeight: 700, fontSize: '1.1rem' }}>
+                                <span>Remaining Balance</span><span style={{ color: 'var(--color-error)' }}>₹{remainingBalance.toFixed(0)}</span>
+                            </div>
+                        )}
                     </div>
 
                     <div style={{ marginTop: 'var(--spacing-lg)' }}>
@@ -314,7 +340,32 @@ const InvoiceModal = ({ order, isOpen, onClose, onPayment, receiptConfig }) => {
                     </div>
 
                     <div style={{ marginTop: 'var(--spacing-lg)' }}>
-                        <label className="input-label">Payment Method</label>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <label className="input-label" style={{ marginBottom: 0 }}>Payment Method</label>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', cursor: 'pointer' }}>
+                                <input type="checkbox" checked={isSplit} onChange={e => setIsSplit(e.target.checked)} />
+                                Partial Bill Split
+                            </label>
+                        </div>
+                        
+                        {isSplit && (
+                            <div style={{ marginTop: 'var(--spacing-sm)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
+                                <div style={{ position: 'relative', flex: 1 }}>
+                                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }}>₹</span>
+                                    <input 
+                                        type="number" 
+                                        className="input" 
+                                        style={{ paddingLeft: '24px' }}
+                                        value={splitAmount} 
+                                        onChange={e => setSplitAmount(e.target.value)} 
+                                        placeholder={`Enter amount (max ₹${remainingBalance.toFixed(0)})`} 
+                                        min="1" 
+                                        max={remainingBalance} 
+                                    />
+                                </div>
+                            </div>
+                        )}
+
                         <div style={{ display: 'flex', gap: 'var(--spacing-sm)', marginTop: 'var(--spacing-sm)' }}>
                             {['cash', 'card', 'upi'].map((method) => (
                                 <button key={method} className={`btn ${paymentMethod === method ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setPaymentMethod(method)}>
@@ -328,8 +379,8 @@ const InvoiceModal = ({ order, isOpen, onClose, onPayment, receiptConfig }) => {
                     <button className="btn btn-ghost" onClick={() => exportInvoicePDF(order, receiptConfig)}>
                         <Printer size={18} /> Print Receipt
                     </button>
-                    <button className="btn btn-success" onClick={handlePayment} disabled={loading}>
-                        {loading ? 'Processing...' : <><Check size={18} /> Complete Payment</>}
+                    <button className="btn btn-success" onClick={handlePayment} disabled={loading || (isSplit && !splitAmount)}>
+                        {loading ? 'Processing...' : <><Check size={18} /> Pay ₹{amountToPay.toFixed(0)}</>}
                     </button>
                 </div>
             </motion.div>

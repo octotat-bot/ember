@@ -11,6 +11,7 @@ import { PageLoader, InlineLoader } from '../components/Loader';
 import ConfirmModal from '../components/ConfirmModal';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import { TransferTableModal, OrderJourneyModal } from '../components/OrderModals';
 import {
     Plus, Clock, X, Minus, Search, UtensilsCrossed, Leaf,
     ChevronDown, ChevronUp, Ban, CheckCircle, Loader2,
@@ -35,17 +36,24 @@ const CANCELLABLE = ['pending', 'confirmed'];
 const statusLabel = (s) => (s || '').replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
 
 // ═══════════════════════════════════════════════════════
-//  CREATE ORDER MODAL  (faster 2-step flow)
+//  CREATE ORDER MODAL  (faster 2-step flow + Quick Add)
 // ═══════════════════════════════════════════════════════
-const CreateOrderModal = ({ isOpen, onClose, onSubmit }) => {
+const CreateOrderModal = ({ isOpen, onClose, onSubmit, existingOrder }) => {
     const { tables, loading: tablesLoading } = useTables({ autoFetch: true });
     const { items: menuItems, categories, loading: menuLoading } = useMenu({ autoFetch: true, available: true });
+    // If existingOrder is passed, lock the table to that order's table.
     const [selectedTable, setSelectedTable] = useState(null);
     const [cart, setCart] = useState([]);
     const [loading, setLoading] = useState(false);
     const [menuSearch, setMenuSearch] = useState('');
     const [menuCategory, setMenuCategory] = useState('all');
     const [showReview, setShowReview] = useState(false);
+
+    useEffect(() => {
+        if (existingOrder && isOpen) {
+            setSelectedTable({ _id: existingOrder.table, tableNumber: existingOrder.tableNumber });
+        }
+    }, [existingOrder, isOpen]);
 
     const addToCart = (item) => {
         const existing = cart.find((c) => c.menuItemId === item._id);
@@ -75,8 +83,8 @@ const CreateOrderModal = ({ isOpen, onClose, onSubmit }) => {
         try {
             await onSubmit({
                 tableId: selectedTable._id,
-                items: cart.map((item) => ({ menuItemId: item.menuItemId, quantity: item.quantity })),
-            });
+                items: cart.map((item) => ({ menuItemId: item.menuItemId, quantity: item.quantity, specialInstructions: '' })),
+            }, existingOrder?._id);
             onClose();
             setSelectedTable(null);
             setCart([]);
@@ -106,7 +114,7 @@ const CreateOrderModal = ({ isOpen, onClose, onSubmit }) => {
             <motion.div className="modal" onClick={(e) => e.stopPropagation()} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} style={{ maxWidth: '900px', width: '95vw' }}>
                 <div className="modal-header">
                     <h3 className="modal-title">
-                        {showReview ? 'Review Order' : 'New Order'}
+                        {existingOrder ? `Add to Order #${existingOrder.orderNumber}` : showReview ? 'Review Order' : 'New Order'}
                     </h3>
                     <button className="modal-close" onClick={handleClose}><X size={20} /></button>
                 </div>
@@ -115,10 +123,11 @@ const CreateOrderModal = ({ isOpen, onClose, onSubmit }) => {
                     {!showReview ? (
                         <>
                             {/* Table Selection — compact row */}
-                            <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                                <label style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: 'var(--spacing-sm)', display: 'block' }}>Select Table</label>
-                                {tablesLoading ? (
-                                    <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--spacing-md)' }}><InlineLoader /></div>
+                            {!existingOrder && (
+                                <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+                                    <label style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: 'var(--spacing-sm)', display: 'block' }}>Select Table</label>
+                                    {tablesLoading ? (
+                                        <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--spacing-md)' }}><InlineLoader /></div>
                                 ) : (
                                     <div style={{ display: 'flex', gap: 'var(--spacing-xs)', flexWrap: 'wrap' }}>
                                         {availableTables.map((table) => (
@@ -136,8 +145,8 @@ const CreateOrderModal = ({ isOpen, onClose, onSubmit }) => {
                                             </p>
                                         )}
                                     </div>
-                                )}
-                            </div>
+                                </div>
+                            )}
 
                             {/* Search + Category */}
                             <div style={{ display: 'flex', gap: 'var(--spacing-sm)', marginBottom: 'var(--spacing-md)', flexWrap: 'wrap' }}>
@@ -239,7 +248,7 @@ const CreateOrderModal = ({ isOpen, onClose, onSubmit }) => {
                             <button className="btn btn-ghost" onClick={() => setShowReview(false)}>Back</button>
                             <div style={{ flex: 1 }} />
                             <button className="btn btn-primary" onClick={handleSubmit} disabled={loading || !selectedTable || cart.length === 0}>
-                                {loading ? 'Creating...' : `Place Order — ₹${cartTotal}`}
+                                {loading ? (existingOrder ? 'Adding...' : 'Creating...') : `${existingOrder ? 'Add Items' : 'Place Order'} — ₹${cartTotal}`}
                             </button>
                         </>
                     ) : (
@@ -291,7 +300,7 @@ const ItemProgressBar = ({ items }) => {
 // ═══════════════════════════════════════════════════════
 //  EXPANDABLE ORDER ROW
 // ═══════════════════════════════════════════════════════
-const OrderRow = ({ order, role, onAction, onCancel, actionLoading, onItemServe, servingItemId }) => {
+const OrderRow = ({ order, role, onAction, onCancel, actionLoading, onItemServe, servingItemId, onQuickAdd, onTransfer, onTrack }) => {
     const [expanded, setExpanded] = useState(false);
     const flow = STATUS_FLOW[order.status] || {};
     const canAct = flow.next && flow.roles.includes(role);
@@ -426,6 +435,15 @@ const OrderRow = ({ order, role, onAction, onCancel, actionLoading, onItemServe,
                                             </div>
                                         );
                                     })}
+                                    {['pending', 'confirmed', 'preparing'].includes(order.status) && ['admin', 'waiter'].includes(role) && (
+                                        <button 
+                                            onClick={() => onQuickAdd(order)}
+                                            className="btn btn-ghost btn-sm" 
+                                            style={{ marginTop: 'var(--spacing-sm)', width: '100%', border: '1px dashed var(--color-primary)', color: 'var(--color-primary)' }}
+                                        >
+                                            <Plus size={14} /> Quick Add Items
+                                        </button>
+                                    )}
                                 </div>
                                 {/* Order info */}
                                 <div>
@@ -462,6 +480,18 @@ const OrderRow = ({ order, role, onAction, onCancel, actionLoading, onItemServe,
                                     );
                                 })}
                             </div>
+
+                            {/* Extra Action Buttons */}
+                            <div style={{ marginTop: 'var(--spacing-md)', display: 'flex', gap: 'var(--spacing-sm)' }}>
+                                <button className="btn btn-ghost btn-sm" onClick={() => onTrack(order)}>
+                                    <Clock size={14} /> Track Journey
+                                </button>
+                                {!['completed', 'cancelled'].includes(order.status) && ['admin', 'waiter'].includes(role) && (
+                                    <button className="btn btn-ghost btn-sm" onClick={() => onTransfer(order)}>
+                                        <ArrowRight size={14} /> Transfer Table
+                                    </button>
+                                )}
+                            </div>
                         </motion.div>
                     </td>
                 </tr>
@@ -484,6 +514,9 @@ const Orders = () => {
     const [actionLoading, setActionLoading] = useState(null);
     const [cancelConfirm, setCancelConfirm] = useState({ open: false, order: null });
     const [servingItemId, setServingItemId] = useState(null);
+    const [quickAddOrder, setQuickAddOrder] = useState(null);
+    const [transferOrder, setTransferOrder] = useState(null);
+    const [trackOrder, setTrackOrder] = useState(null);
 
     const role = user?.role || 'waiter';
 
@@ -635,6 +668,9 @@ const Orders = () => {
                                     actionLoading={actionLoading}
                                     onItemServe={handleItemServe}
                                     servingItemId={servingItemId}
+                                    onQuickAdd={setQuickAddOrder}
+                                    onTransfer={setTransferOrder}
+                                    onTrack={setTrackOrder}
                                 />
                             ))}
                         </tbody>
@@ -642,7 +678,41 @@ const Orders = () => {
                 </div>
             )}
 
-            <CreateOrderModal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} onSubmit={createOrder} />
+            <CreateOrderModal
+                isOpen={showCreateModal || !!quickAddOrder}
+                onClose={() => { setShowCreateModal(false); setQuickAddOrder(null); }}
+                existingOrder={quickAddOrder}
+                onSubmit={async (data, existingId) => {
+                    if (existingId) {
+                        await orderAPI.addItems(existingId, data.items);
+                        toast.success('Items added to order!');
+                        refetch();
+                    } else {
+                        await createOrder(data);
+                    }
+                }}
+            />
+
+            <TransferTableModal 
+                isOpen={!!transferOrder} 
+                onClose={() => setTransferOrder(null)} 
+                order={transferOrder} 
+                onSubmit={async (orderId, tableId) => {
+                    try {
+                        await orderAPI.transferTable(orderId, tableId);
+                        toast.success('Table transferred successfully!');
+                        refetch();
+                    } catch {
+                        toast.error('Failed to transfer table');
+                    }
+                }}
+            />
+
+            <OrderJourneyModal
+                isOpen={!!trackOrder}
+                onClose={() => setTrackOrder(null)}
+                order={trackOrder}
+            />
 
             <ConfirmModal
                 isOpen={cancelConfirm.open}
