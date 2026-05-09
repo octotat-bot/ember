@@ -774,38 +774,6 @@ const Dashboard = () => {
 
     return (
         <Layout>
-            {/* Greeting Header */}
-            <div style={{
-                marginBottom: '28px',
-                paddingBottom: '20px',
-                borderBottom: '1px solid var(--color-border)',
-                display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
-            }}>
-                <div>
-                    <div style={{ fontFamily: 'var(--font-primary)', fontSize: '11px', color: 'var(--color-text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '4px' }}>{greeting}</div>
-                    <div style={{ fontFamily: 'var(--font-secondary)', fontSize: '32px', fontWeight: 700, color: 'var(--color-text)', lineHeight: 1.1 }}>
-                        {user?.name || user?.username || 'Welcome'} 👋
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '8px' }}>
-                        <span style={{
-                            fontFamily: 'var(--font-primary)', fontSize: '10px',
-                            background: 'var(--accent-bg)', color: 'var(--color-primary)',
-                            padding: '3px 10px', borderRadius: '4px',
-                            textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600,
-                        }}>{role}</span>
-                        <span style={{ fontFamily: 'var(--font-primary)', fontSize: '11px', color: 'var(--color-text-muted)' }}>{config.subtitle}</span>
-                    </div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#5a9e5a', animation: 'pulse-badge 2s infinite' }} />
-                        <span style={{ fontFamily: 'var(--font-primary)', fontSize: '11px', color: '#5a9e5a', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Live</span>
-                    </div>
-                    <span style={{ fontFamily: 'var(--font-primary)', fontSize: '11px', color: 'var(--color-text-muted)' }}>
-                        {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                </div>
-            </div>
             {/* Dashboard */}
             {renderDashboard()}
 

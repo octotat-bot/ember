@@ -124,6 +124,12 @@ const ROLE_COLORS = {
     runner: { color: '#6B6460', background: '#2E2B28' }
 };
 
+const ROLE_GREETING = (role) => {
+    const hour = new Date().getHours();
+    const time = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    return time;
+};
+
 const Layout = ({ children }) => {
     const { user, logout } = useAuth();
     const { unreadCount, notifications, markNotificationRead, markAllRead } = useSocket();
@@ -197,15 +203,36 @@ const Layout = ({ children }) => {
             )}
             
             {/* Branding Top-Left Stack */}
-            <div style={{ position: 'fixed', top: previewRole ? 44 : 20, left: 24, zIndex: 100, pointerEvents: 'none', display: 'flex', flexDirection: 'column', transition: 'top 0.2s' }}>
+            <div style={{ position: 'fixed', top: previewRole ? 44 : 20, left: 24, zIndex: 100, pointerEvents: 'none', display: 'flex', flexDirection: 'column', gap: 4, transition: 'top 0.2s' }}>
                 <div style={{ fontFamily: 'var(--font-secondary)', fontSize: 22, color: 'var(--color-text)', fontWeight: 700, lineHeight: 1 }}>
                     Ember
                 </div>
-            </div>
-            <div style={{ position: 'fixed', top: previewRole ? 72 : 48, left: 24, zIndex: 100, pointerEvents: 'none', transition: 'top 0.2s' }}>
-                <div style={{ fontFamily: 'var(--font-primary)', fontSize: 9, color: 'var(--color-text-muted)', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.14em' }}>
-                    {pageName}
-                </div>
+                {isDashboard && user ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span style={{ fontFamily: 'var(--font-primary)', fontSize: 10, color: 'var(--color-text-muted)', letterSpacing: '0.04em' }}>
+                                {ROLE_GREETING(user.role)}, <strong style={{ color: 'var(--color-text)', fontWeight: 600 }}>{user.name?.split(' ')[0] || user.username}</strong>
+                            </span>
+                            <span style={{ fontSize: 12 }}>👋</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{
+                                fontFamily: 'var(--font-primary)', fontSize: 8,
+                                background: 'var(--accent-bg)', color: 'var(--color-primary)',
+                                padding: '1px 6px', borderRadius: 3,
+                                textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600,
+                            }}>{user.role}</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#5a9e5a' }} />
+                                <span style={{ fontFamily: 'var(--font-primary)', fontSize: 8, color: '#5a9e5a', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Live</span>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div style={{ fontFamily: 'var(--font-primary)', fontSize: 9, color: 'var(--color-text-muted)', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.14em' }}>
+                        {pageName}
+                    </div>
+                )}
             </div>
             {!isDashboard && (
                 <button onClick={() => { const roleDefault = { admin: '/dashboard', waiter: '/orders', chef: '/kitchen', cashier: '/billing', runner: '/ready-orders' }; navigate(roleDefault[user?.role] || '/dashboard'); }} aria-label="Go back" style={{ position: 'fixed', top: previewRole ? 96 : 72, left: 24, zIndex: 100, pointerEvents: 'auto', background: 'none', border: 'none', padding: 0, display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontFamily: 'var(--font-primary)', fontSize: 11, color: 'var(--color-text-muted)', letterSpacing: '0.06em', textDecoration: 'none', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.color = '#C8975A'} onMouseOut={e => e.currentTarget.style.color = 'var(--color-text-muted)'}>
