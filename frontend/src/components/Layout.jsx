@@ -201,8 +201,21 @@ const Layout = ({ children }) => {
                     </button>
                 </div>
             )}
-            
+
+            {/* ── Fixed header background — blocks content from scrolling through ── */}
+            <div style={{
+                position: 'fixed',
+                top: previewRole ? 24 : 0,
+                left: 0, right: 0,
+                height: previewRole ? 116 : 101,
+                background: 'var(--bg-canvas)',
+                zIndex: 98,
+                borderBottom: '0.5px solid var(--color-border)',
+                transition: 'top 0.2s, height 0.2s',
+            }} />
+
             {/* Branding Top-Left Stack */}
+
             <div style={{ position: 'fixed', top: previewRole ? 44 : 20, left: 24, zIndex: 100, pointerEvents: 'none', display: 'flex', flexDirection: 'column', gap: 4, transition: 'top 0.2s' }}>
                 <div style={{ fontFamily: 'var(--font-secondary)', fontSize: 22, color: 'var(--color-text)', fontWeight: 700, lineHeight: 1 }}>
                     Ember
@@ -248,8 +261,6 @@ const Layout = ({ children }) => {
                 )}
             </div>
 
-            {/* Fixed separator line between header and content */}
-            <div style={{ position: 'fixed', top: previewRole ? 124 : 100, left: 0, right: 0, height: '0.5px', background: 'var(--color-border)', zIndex: 99, opacity: 0.7 }} />
 
             {/* Admin Identity Top-Right */}
             {user && (
