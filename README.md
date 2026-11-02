@@ -77,4 +77,4 @@ npm run dev
 - CORS is dynamically configured on the backend to allow requests from any Vercel preview domain (`*.vercel.app`) as well as local development environments.
 
 ## 📄 License
-This project is proprietary and confidential.
+MIT. See [LICENSE](LICENSE).
